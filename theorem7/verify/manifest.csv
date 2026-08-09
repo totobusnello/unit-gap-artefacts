@@ -1,0 +1,15 @@
+result,leg,k,cnf_sha16,verdict,regenerate
+# cnf_sha16 = first 16 hex (64 bits) of SHA-256 of the CNF (encoder-deterministic). DRAT bytes are
+# NOT deterministic across solver builds; the portable acceptance test is "drat-trim VERIFIED".
+7th-class witness 0x03de0154,opt lower bound,1,87e9e86c035d178e,UNSAT / drat-trim VERIFIED,reproduce_witness.py
+7th-class witness 0x03de0154,opt lower bound,2,643d4fc6dcd26690,UNSAT / drat-trim VERIFIED,reproduce_witness.py
+7th-class witness 0x03de0154,opt lower bound,3,a4c2ba4cd9869694,UNSAT / drat-trim VERIFIED,reproduce_witness.py
+7th-class witness 0x03de0154,opt lower bound,4,8cc6311c2452bdff,UNSAT / drat-trim VERIFIED,reproduce_witness.py
+7th-class witness 0x03de0154,opt lower bound,5,332e32b9d40121de,UNSAT / drat-trim VERIFIED,reproduce_witness.py
+7th-class witness 0x03de0154,opt lower bound,6,c2b41413f8d88dff,UNSAT / drat-trim VERIFIED,reproduce_witness.py
+7th-class witness 0x03de0154,opt lower bound,7,e9895415f992bfdd,UNSAT / drat-trim VERIFIED,reproduce_witness.py
+7th-class witness 0x03de0154,opt witness,8,aa50491525665129,SAT / verify_circuit self-certifying => opt=8,reproduce_witness.py
+7th-class witness 0x03de0154,tree upper bound (fan-out-1 formula),9,8fa10b4d591f800f,SAT / verify_circuit self-certifying => tree<=9,reproduce_witness.py
+7th-class witness 0x03de0154,forced-multi (amo-shared; no gate-ordering symmetry break),8,ed3b8350f72f8078,UNSAT / drat-trim VERIFIED => every optimum has >=2 reconvergences,reproduce_witness.py --full
+7th-class witness 0x03de0154,non-canalizing (no constant cofactor),,,combinatorial => not an AND/OR-lift,reproduce_witness.py
+class count,>=9 distinct NPN classes (3 non-lift witnesses + 6 lifts),,,exhaustive full n=5 NPN group (7680 transforms) no solver,verify/npn_check_bk5.py

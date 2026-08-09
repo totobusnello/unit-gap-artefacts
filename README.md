@@ -12,6 +12,20 @@ step toward either. It is a correction to one published claim, plus the data beh
 
 ---
 
+## Theorem 7: forced reconvergence (companion result)
+
+The directory [`theorem7/`](theorem7/) holds a second, self-contained result on the same paper —
+a refutation of **Theorem 7** and the positive structure that replaces it. Where Theorem 7 claims a
+unit gap comes from *exactly one* shared gate, the opposite holds and is *forced*: some functions
+have **every** size-optimal AIG carrying ≥ 2 reconvergent (fan-out ≥ 2) gates. A closure (Lift)
+theorem makes the family infinite (for every `n ≥ 4`), and at `n = 5` there is a seventh, non-lift
+class — all reproducible from scratch with `kissat` + `drat-trim`. Start at
+[`theorem7/VERIFY.md`](theorem7/VERIFY.md).
+
+Like the Theorem 2 material, this is a structural result, **not** progress on P vs NP.
+
+---
+
 ## The refutation
 
 Theorem 2 asserts that for every Boolean function the minimum formula size exceeds the minimum
