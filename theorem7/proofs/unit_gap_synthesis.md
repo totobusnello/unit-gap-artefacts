@@ -1,19 +1,17 @@
 # From refutation to theorem: the structure of gap=1 sharing in optimal AIGs
 
-*A unified note on Theorem 7 of "The Unit Gap" (arXiv:2603.08033, v1/v2; the paper was withdrawn
-2026-08-04 for an unrelated false Theorem 2). Written for collaboration — every quantitative claim
-traces to a DRAT certificate or an exhaustive enumeration in the full development; this curated
-repository reproduces the core witnesses from scratch (`../VERIFY.md` states exactly which claims
-are re-run here and which are cited).*
+*A unified note on Theorem 7 of “The Unit Gap” (arXiv:2603.08033), tying together four results
+(claims 0033–0036). Written for collaboration — every quantitative claim traces to a
+DRAT-certificate or an exhaustive enumeration named in the “Artifacts” section.*
 
 ## Model
 
 And-Inverter Graphs over `U₂`: 2-input AND gates, inversions free on every edge and on the
 output, constant `1` free. `opt(f)` = minimum AND-gate count of a circuit (DAG) computing `f`;
 `tree(f)` = minimum of a **formula** (every gate fan-out 1); `gap(f) = tree(f) − opt(f) ≥ 0`. A
-**reconvergence** ("sharing") is an internal gate with fan-out ≥ 2. This is the model of the
-paper; our exact-synthesis encoder is cross-validated against independent enumeration and every
-SAT model is re-checked by simulation (`verify_circuit`).
+**reconvergence** (“sharing”) is an internal gate with fan-out ≥ 2. This is the model of the
+paper; our exact-synthesis encoder is cross-validated (G3) and every SAT model is re-checked by
+simulation (`verify_circuit`).
 
 Theorem 7 (Two-Mechanism), as stated:
 
@@ -35,8 +33,8 @@ Working inside Krinkin's AIG unit-gap framework, this note contributes:
    **Corollary 6** (the sharing term `s∈{0,1}`: we exhibit `s=3` for `⊕₃` and `s=6` for `⊕₄`)
    and **Theorem 7** (§1), plus an **exhaustive** n=4 census placing **72/222 NPN classes at
    gap≥2**. (Theorem 2's `gap≤1` bound is already contradicted by classical Schnorr + Khrapchenko
-   bounds; our part there is to quantify it, not to refute it first. The census rests on the
-   tree-DP + exact synthesis, *not* per-class DRAT — the drat-trim certificates back
+   bounds; our part there is to quantify it, not to refute it first. Note the census rests on the
+   tree-DP + exact synthesis of claim 0026, *not* per-class DRAT — the drat-trim certificates back
    the Cor 6 / Thm 7 witnesses, `s=3`/`s=6`, and the flagship `0x03de`.)
 2. **A complete structural characterization of the gap=1 stratum at n=4** (§1–§2): which classes
    force reconvergence, and the cardinality (up to 3) and degree (up to 3) of the sharing. The
@@ -44,40 +42,38 @@ Working inside Krinkin's AIG unit-gap framework, this note contributes:
    *forced-reconvergence reading* is new.
 3. **A forcedness certificate** (§2). A SAT/DRAT encoding that proves a structural invariant —
    *every* size-optimal AIG has ≥2 reconvergences — over the **entire** optimal set by a single
-   UNSAT: encode "there exists an opt-gate circuit with ≤1 reconvergence" and certify it
+   UNSAT: encode “there exists an opt-gate circuit with ≤1 reconvergence” and certify it
    unsatisfiable. This certifies a property of *all* optima, not merely exhibits one witness. It
    is a natural instantiation of exact synthesis, but we did not find this certified-forcedness
    use in the literature.
-   *Coverage of all optima (soundness of the certificate).* On the trusted path the encoding uses
-   only symmetry breaking that is manifestly without loss of generality at k = opt — operand
-   ordering `a<b`, distinct operands `a≠b`, deduplication of identical gates, "no dead gate" (each
-   gate feeds a later one), and a topological order with the output last. A dead, duplicate, or
+   *Coverage of all optima (soundness of the certificate).* The encoding applies symmetry-breaking
+   — operand ordering `a<b`, distinct operands `a≠b`, deduplication of identical gates, "no dead
+   gate" (each gate feeds a later one), and a topological order with the output as the last gate.
+   Every one of these is without loss of generality *at k = opt* — a dead, duplicate, or
    same-operand gate would yield a strictly smaller circuit, and reordering/relabelling is a
-   renaming of the same DAG; crucially **none changes any gate's fan-out**. So the
+   renaming of the same DAG — and, crucially, **none changes any gate's fan-out**. So the
    canonicalization map from optimal AIGs to encoded models is fan-out-preserving: a size-optimal
    circuit with ≤1 reconvergence would map to a satisfying assignment with ≤1 reconvergence. The
-   UNSAT therefore rules out *every* size-optimal circuit, not only canonical representatives. (For
-   the seventh-class witness of "Honest scope" the forced-multi UNSAT is obtained with **no gate
-   ordering at all**, so this coverage argument reduces to the trivial renaming symmetries.)
+   UNSAT therefore rules out *every* size-optimal circuit, not only canonical representatives.
 4. **A closure / lift theorem** (§4). The forced-reconvergence family is *closed* under
    conjunction/disjunction with a fresh variable, with `opt` and `tree` each `+1` — yielding
-   forced-multi functions for **every n≥4** (the Lift Theorem). The lower bound is elementary
+   forced-reconvergence-type functions for **every n≥4** (the Lift Theorem). The lower bound is elementary
    (classical gate elimination); the contribution is the forced-multi *inheritance* and the
    resulting infinite family.
 
-## §1 — Theorem 7 is false as stated (n=4)
+## §1 — Theorem 7 is false as stated (claim 0033, n=4)
 
 The statement bundles three assertions; they must be separated.
 
-- **Uniqueness / exhaustiveness** ("exactly one gate … no other sharing structure"): **false.**
-- **The proof's `s(a,b)=1` step** (via Corollary 6): **false** — Corollary 6 is itself refuted
-  (`s` reaches 3 in ⊕₃, 6 in ⊕₄), and in the witnesses the top cut gives `s=3`.
+- **Uniqueness / exhaustiveness** (“exactly one gate … no other sharing structure”): **false.**
+- **The proof’s `s(a,b)=1` step** (via Corollary 6): **false** — Corollary 6 is itself refuted
+  (claim 0025: `s` reaches 3 in ⊕₃, 6 in ⊕₄), and in the witnesses the top cut gives `s=3`.
 - **Per-gate dual/same taxonomy:** *not* refuted (it is near-tautological: two consumers agree
   or disagree in polarity). We do not contest it.
 
 Enumerating the size-optimal circuits of the **57 NPN classes with gap=1** at n=4:
 
-- **37/57** admit an optimal AIG with **≥ 2 reconvergences** — contradicting "exactly one".
+- **37/57** admit an optimal AIG with **≥ 2 reconvergences** — contradicting “exactly one”.
 - **6 are zero-conforming** (exhaustive): `0x0358, 0x0359, 0x03de, 0x06b5, 0x07bc, 0x178e` —
   **every** optimum has ≥ 2 reconvergences; no theorem-conforming optimum exists.
 
@@ -92,13 +88,13 @@ g3 = ¬x4 ∧ ¬g1     g6 = ¬g4 ∧ ¬g5        (output)
 `g2`,`g3` reconverge; the two output-operand cones intersect in `{g1,g2,g3}`, so the top cut is
 `s=3`, not 1. For `0x03de`, **`gap = 7 − 6 = 1` is DRAT-certified end-to-end** (opt: circuit
 UNSAT k=1..5; tree: formula UNSAT k=1..6 + a 7-gate formula witness) and the circuit is
-hand-checkable over the 16 rows. A second n=4 witness `0x0016` (opt=7) is DRAT-certified in the full development (not shipped in this curated repo).
+hand-checkable over the 16 rows. A second DRAT witness `0x0016` (opt=7) is in the artifacts.
 
-## §2 — The structure of gap=1 sharing at n=4: forced, multiple, variable-degree
+## §2 — The structure of gap=1 sharing at n=4: forced, multiple, variable-degree (claim 0034)
 
 One could hope to *rescue* Theorem 7 by weakening a constant. But its three regularities —
-(i) cardinality "exactly one", (ii) degree "fan-out 2", (iii) exhaustiveness "no other
-structure" — each fail **independently**:
+(i) cardinality “exactly one”, (ii) degree “fan-out 2”, (iii) exhaustiveness “no other
+structure” — each fail **independently**:
 
 - **(A) Cardinality is not 1.** `0x07bc` (opt=7): exhaustively, 48 optima, of which **24 have
   three** reconvergences and 24 have two — none has one.
@@ -106,17 +102,18 @@ structure" — each fail **independently**:
   gate** (hand-checkable; gate 2 feeds gates 3,4,5). `opt(0x016e)=8` is DRAT-certified — the
   degree-3 optimum is provably size-optimal.
 - **(Z) Uniqueness is impossible for six classes.** For the six zero-conforming classes,
-  *"there exists an opt-gate AIG with ≤ 1 reconvergence"* is **UNSAT** (an at-most-one-shared
+  *“there exists an opt-gate AIG with ≤ 1 reconvergence”* is **UNSAT** (an at-most-one-shared
   SAT encoding), drat-trim `s VERIFIED`. Multiple reconvergence is **forced**.
 
 So Theorem 7 does not merely lose a special case — three of its structural commitments each
 break by a different mechanism. Degree-2 is not universal; single-reconvergence is impossible.
 
-## §3 — Forced multiple reconvergence is not an n=4 artifact
+## §3 — Forced multiple reconvergence is not an n=4 artifact (claim 0035)
 
-Call a function **forced-multi** — the **forced-reconvergence family** (previously denoted `Z`) — if it is gap=1 and
+Call a function **forced-reconvergence-type** — the **forced-reconvergence family** , for the gap framework in
+which it lives and the characterization given here; previously denoted `Z` — if it is gap=1 and
 *every* size-optimal AIG has ≥ 2 reconvergences (forced multiple reconvergence). The six §2
-classes are forced-multi at n=4. The phenomenon persists at n=5, DRAT-certified end-to-end:
+classes are forced-reconvergence-type at n=4. The phenomenon persists at n=5, DRAT-certified end-to-end:
 
 | function | | opt | tree | gap | forced-multi |
 |---|---|---|---|---|---|
@@ -126,12 +123,12 @@ classes are forced-multi at n=4. The phenomenon persists at n=5, DRAT-certified 
 and once more at n=6: `0x3de000000000000` (`0x03de ∧ x₄ ∧ x₅`), opt=8, tree=9, gap=1,
 forced-multi. Each leg — opt lower bound, tree/gap, forced-multi — is a separate DRAT proof.
 
-## §4 — The Lift Theorem: forced-multi functions exist for every n ≥ 4
+## §4 — The Lift Theorem: forced-reconvergence-type functions exist for every n ≥ 4 (claim 0036)
 
 The n=4→5→6 witnesses are all of the form `z ∧ x_new` / `z ∨ x_new`. This is a lemma:
 
-> **Lift lemma.** If `z` is forced-multi (forced-multi, gap=1) on n variables, then `z ∧ x_{n+1}` and
-> `z ∨ x_{n+1}` are forced-multi on n+1 variables, with `opt` and `tree` each `+1` (gap preserved).
+> **Lift lemma.** If `z` is forced-reconvergence-type (forced-multi, gap=1) on n variables, then `z ∧ x_{n+1}` and
+> `z ∨ x_{n+1}` are forced-reconvergence-type on n+1 variables, with `opt` and `tree` each `+1` (gap preserved).
 
 **Proof (full, self-contained, `proof_lift_lemma.md`).** *Upper bound:* an optimal `z`-circuit
 plus one AND with `x` gives `opt(z∧x) ≤ opt(z)+1`. *Lower bound:* restrict `x=1` (so `z∧x` ↦ `z`);
@@ -141,18 +138,18 @@ propagation then yields a `z`-circuit with one fewer
 gate, so `opt(z∧x)=opt(z)+1`. *Forced-multi inheritance:* in an optimal lift the restriction
 eliminates exactly one gate, and contracting that single pass-through is non-increasing in the
 reconvergence count (a four-case fan-out analysis), so the resulting optimal `z`-circuit would
-inherit ≤ 1 reconvergence — impossible, as `z` is forced-multi. *Formulas* (tree) are handled directly
+inherit ≤ 1 reconvergence — impossible, as `z` is forced-reconvergence-type. *Formulas* (tree) are handled directly
 by pruning a minimum formula (with dead-code removal), and the `∨` case is the `x=0` dual.
 
 > **Lift Theorem.** For every `n ≥ 4` there is an `n`-variable Boolean function that is gap=1
 > with forced multiple reconvergence — i.e. the forced-reconvergence family is non-empty at every `n ≥ 4`.
 
-*Proof.* Take the n=4 flagship `z₄ = 0x03de` (forced-multi, DRAT-certified) and set
-`z_{n+1} := z_n ∧ x_{n+1}`; the lemma makes each `z_n` forced-multi. ∎
+*Proof.* Take the n=4 flagship `z₄ = 0x03de` (forced-reconvergence-type, DRAT-certified) and set
+`z_{n+1} := z_n ∧ x_{n+1}`; the lemma makes each `z_n` forced-reconvergence-type. ∎
 
 **Corroboration** (independent of the proof): n=3-exhaustive check of `opt(z∘x)=opt(z)+1` (all
 218 essential functions, 0 violations); the DRAT chain n=4→5→6; a forced-multi-inheritance probe
-(0 losses over the six n=4 forced-multi classes).
+(0 losses over the six n=4 forced-reconvergence classes).
 
 ---
 
@@ -203,10 +200,10 @@ textbook folklore is still advisable before journal submission.)
 
 ## Honest scope
 
-- **Additional non-lift classes: there is a seventh class — the family is not lift-generated (resolved).** Write
+- **Density: there is a seventh class — the family is not lift-generated (resolved).** Write
   `F_n` for the number of NPN classes of `n`-variable forced-multi gap=1 functions. Then
   `F₄ = 6` (exhaustive, machine-verified: the six classes of §2), `F₅ ≥ 6` from the AND-lifts,
-  and — settling whether the family is only the lifts — **`F₅ ≥ 7`: there exist non-canalizing (non-lift)
+  and — settling the density question — **`F₅ ≥ 7`: there exist non-canalizing (non-lift)
   forced-multi gap=1 functions at n=5.** Three explicit witnesses which an exhaustive
   canonicalization over the full NPN group of `n=5` (all `5!·2⁵·2 = 7680` transforms) certifies to
   be three *distinct* classes, each also distinct from all six lifts, so `F₅ ≥ 9`:
@@ -221,13 +218,11 @@ textbook folklore is still advisable before journal submission.)
   symmetry-break-independent); `gap=1` (a `verify_circuit`'d fan-out-1 formula at k=9 gives
   `tree ≤ 9`, and forced-multi gives `tree ≥ 9`, self-certifying); and forced-multi (the
   at-most-one-shared encoding is UNSAT at k=opt, drat-trim-verified). For the witness the
-  forced-multi UNSAT is obtained with **no gate-ordering symmetry break** (only the base encoder's
-  WLOG normalizations: operand order a<b, no duplicate/dead gate, output-last) — the vetted encoder plus an
-  UNSAT-targeted solver closes k=8 directly, so the certificate is a plain DRAT with no
-  reliance on a symmetry-breaking soundness argument. (A gate-ordering constraint, argued WLOG by
-  three independent analyses, is used only to *accelerate* the harder opt=9 instances and the
-  sweep; it is off the witness's trusted path, and it is a WLOG-ordering rather than a variable
-  symmetry — its machine-certified dominance version is future work.)
+  forced-multi UNSAT is obtained **without any symmetry break** — the vetted encoder plus an
+  UNSAT-targeted solver closes k=8 directly (66 s), so the certificate is a plain DRAT with no
+  reliance on a symmetry-breaking soundness argument. (A gate-ordering symmetry break, proven
+  WLOG by three independent analyses, is used only to *accelerate* the harder opt=9 instances and
+  the sweep; it is off the witness's trusted path.)
   - *Construction (the shape that works).* The witnesses are `z ∧ (ℓ ∨ x₄)` — the lifting
     literal absorbed into an *existing* variable, so the independence gadget sits **beside** `z`
     rather than substituted **into** its inputs. This keeps `opt = opt(z)+2` and `tree = opt+1`,
@@ -237,21 +232,22 @@ textbook folklore is still advisable before journal submission.)
     non-forced-multi non-canalizing gap=1 functions, and every *substituted* construction paid a
     gap penalty — the "cost of independence" is real but not fatal: absorbing the literal beside
     `z`, at one specific literal polarity, keeps the gap at 1 while breaking canalization.
-- **The theorem is a paper proof** in the AIG model (with DRAT-certified base and n=4/5/6
-  instances); it is not yet machine-checked (Lean). A formalization would be a separate effort.
-- **Encoder→CNF** is a semantic bridge outside DRAT, mitigated by cross-validation and
+- **The theorem is a paper proof** in the AIG model (reviewed, and with DRAT-certified base and
+  n=4/5/6 instances); it is not yet machine-checked (Lean). A formalization would be a separate
+  effort.
+- **Encoder→CNF** is a semantic bridge outside DRAT, mitigated by G3 cross-validation and
   per-circuit `verify_circuit`.
 - **Scope** is specific DRAT witnesses at n=5/6 plus the general lemma; n ≥ 5 exhaustive
   enumeration is infeasible (616k+ NPN classes).
 
-## Artifacts (in this repository)
+## Artifacts (paths as in the private tree)
 
-- **Proofs:** `proofs/proof_lift_lemma.md` (the full Lift Lemma proof), and this note.
-- **Encoder:** `encoder/aig_exact.py` (AIG exact-synthesis SAT encoder + `verify_circuit`),
-  `encoder/n5_forced_test.py` (`build_amo_shared`, the at-most-one-shared forced-reconvergence
-  encoding), `encoder/zc_certify.py` (CNF/DRAT helpers).
-- **Reproduce & check:** `verify/reproduce_witness.py` (regenerates the seventh-class witness
-  `0x03de0154` from scratch and re-checks with drat-trim), `verify/npn_check_bk5.py` (the
-  exhaustive NPN-group count giving `F₅ ≥ 9`), `verify/manifest.csv` (claim → CNF SHA → verdict),
-  `verify/sample_certs/` (tiny opt-lower-bound certificates for a zero-setup `drat-trim` spot
-  check). See `VERIFY.md` for the one-command setup and reproduction.
+- Per-claim technotes: `notes/technote_thm7_refutation.md` (0033),
+  `notes/technote_thm7_substitution.md` (0034), `notes/technote_z_generalization.md` (0035),
+  `notes/proof_lift_lemma.md` (0036, the full proof).
+- Code: `experiments/exp_krinkin_cor6/` — `thm7_check.py`, `zc_certify.py` (at-most-one-shared),
+  `n5_forced_test.py`, `n5_directed.py`, `lift_lemma_empirical_test.py`; encoder
+  `experiments/exp_gate_0001/aig_exact.py`.
+- DRAT certificates: `experiments/exp_krinkin_cor6/certs/` (e.g. `zc_0x03de_amo1shared.drat`,
+  `opt_0x016e_k7.drat`, `n5_0x03de0000_amo1shared.drat`) — each verified with `drat-trim`
+  (`s VERIFIED`); SHA-256 prefixes recorded in the accompanying `*_witness.json` / ledger.

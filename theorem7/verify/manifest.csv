@@ -1,6 +1,4 @@
 result,leg,k,cnf_sha16,verdict,regenerate
-# cnf_sha16 = first 16 hex (64 bits) of SHA-256 of the CNF (encoder-deterministic). DRAT bytes are
-# NOT deterministic across solver builds; the portable acceptance test is "drat-trim VERIFIED".
 7th-class witness 0x03de0154,opt lower bound,1,87e9e86c035d178e,UNSAT / drat-trim VERIFIED,reproduce_witness.py
 7th-class witness 0x03de0154,opt lower bound,2,643d4fc6dcd26690,UNSAT / drat-trim VERIFIED,reproduce_witness.py
 7th-class witness 0x03de0154,opt lower bound,3,a4c2ba4cd9869694,UNSAT / drat-trim VERIFIED,reproduce_witness.py
@@ -10,6 +8,17 @@ result,leg,k,cnf_sha16,verdict,regenerate
 7th-class witness 0x03de0154,opt lower bound,7,e9895415f992bfdd,UNSAT / drat-trim VERIFIED,reproduce_witness.py
 7th-class witness 0x03de0154,opt witness,8,aa50491525665129,SAT / verify_circuit self-certifying => opt=8,reproduce_witness.py
 7th-class witness 0x03de0154,tree upper bound (fan-out-1 formula),9,8fa10b4d591f800f,SAT / verify_circuit self-certifying => tree<=9,reproduce_witness.py
-7th-class witness 0x03de0154,forced-multi (amo-shared; no gate-ordering symmetry break),8,ed3b8350f72f8078,UNSAT / drat-trim VERIFIED => every optimum has >=2 reconvergences,reproduce_witness.py --full
+7th-class witness 0x03de0154,forced-multi (amo-shared NO symmetry break),8,ed3b8350f72f8078,UNSAT / drat-trim VERIFIED => every optimum has >=2 reconvergences,reproduce_witness.py --full
 7th-class witness 0x03de0154,non-canalizing (no constant cofactor),,,combinatorial => not an AND/OR-lift,reproduce_witness.py
-class count,>=9 distinct NPN classes (3 non-lift witnesses + 6 lifts),,,exhaustive full n=5 NPN group (7680 transforms) no solver,verify/npn_check_bk5.py
+F5 count,>=10 distinct NPN classes (6 lifts + 3 directed sweep + 1 random census),,,exhaustive full NPN group (7680 transforms) no solver,exp_krinkin_cor6/npn_check_f5.py
+10th-class witness 0x09c50800 (claim 0038; promoted 2026-08-10; panel 3/3 GO),opt lower bound,1,93e5b48eeace3859,UNSAT / drat-trim VERIFIED,reproduce_witness.py 0x09c50800
+10th-class witness 0x09c50800 (claim 0038; promoted 2026-08-10; panel 3/3 GO),opt lower bound,2,325da4d52baf998b,UNSAT / drat-trim VERIFIED,reproduce_witness.py 0x09c50800
+10th-class witness 0x09c50800 (claim 0038; promoted 2026-08-10; panel 3/3 GO),opt lower bound,3,2d97b762cf4a1673,UNSAT / drat-trim VERIFIED,reproduce_witness.py 0x09c50800
+10th-class witness 0x09c50800 (claim 0038; promoted 2026-08-10; panel 3/3 GO),opt lower bound,4,08650932a407b6c9,UNSAT / drat-trim VERIFIED,reproduce_witness.py 0x09c50800
+10th-class witness 0x09c50800 (claim 0038; promoted 2026-08-10; panel 3/3 GO),opt lower bound,5,ca73dfeecc71cb45,UNSAT / drat-trim VERIFIED,reproduce_witness.py 0x09c50800
+10th-class witness 0x09c50800 (claim 0038; promoted 2026-08-10; panel 3/3 GO),opt lower bound,6,af1360aa4a704081,UNSAT / drat-trim VERIFIED,reproduce_witness.py 0x09c50800
+10th-class witness 0x09c50800 (claim 0038; promoted 2026-08-10; panel 3/3 GO),opt lower bound,7,ea9483623e205afd,UNSAT / drat-trim VERIFIED,reproduce_witness.py 0x09c50800
+10th-class witness 0x09c50800 (claim 0038; promoted 2026-08-10; panel 3/3 GO),opt witness,8,b036c25a447dc84b,SAT / verify_circuit self-certifying => opt=8,reproduce_witness.py 0x09c50800
+10th-class witness 0x09c50800 (claim 0038; promoted 2026-08-10; panel 3/3 GO),tree upper bound (fan-out-1 formula; per-gate fan-out counted),9,343cecdb5118640b,SAT / verify_circuit + fan-out count => tree<=9,reproduce_witness.py 0x09c50800
+10th-class witness 0x09c50800 (claim 0038; promoted 2026-08-10; panel 3/3 GO),forced-multi (amo-shared NO symmetry break),8,8949334bf9baa8ca,UNSAT / drat-trim VERIFIED => every optimum has >=2 reconvergences,reproduce_witness.py 0x09c50800 --full
+10th-class witness 0x09c50800 (claim 0038; promoted 2026-08-10; panel 3/3 GO),non-canalizing (no constant cofactor),,,combinatorial => not an AND/OR-lift,reproduce_witness.py 0x09c50800

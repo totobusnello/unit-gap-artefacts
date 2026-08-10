@@ -1,12 +1,14 @@
 # The Lift Lemma — a full proof
 
-> A complete proof of the lift lemma and its unconditional consequence: **forced-multiple-
-> reconvergence gap=1 (forced-reconvergence family) functions exist for every n ≥ 4.** Self-contained; the encoder
-> it refers to is in `../encoder/`, and the certificates it refers to are reproduced by `../VERIFY.md`.
+> Companion to `technote_z_generalization.md` (claim `7P-PNP-CLM-0035`). This note
+> upgrades the *sketch* of the lift lemma to a complete proof, and derives the
+> unconditional consequence: **forced-multiple-reconvergence gap=1 (forced-reconvergence family) functions
+> exist for every n ≥ 4.** LASTRO standard (`../13_WRITEUP_STANDARD.md`).
 
 ## Model and definitions
 
-We work in the And-Inverter Graph (AIG) model over the basis U₂ (see `../encoder/aig_exact.py`):
+We work in the And-Inverter Graph (AIG) model over the basis U₂ used throughout this
+repository (`aig_exact.py`, validated cross-check G3):
 
 - A **circuit** is a DAG. Sources are the input variables `x₁,…,x_n` and the constant `1`.
   Every internal node is a **2-input AND gate**. Every edge and the output may be freely
@@ -15,10 +17,9 @@ We work in the And-Inverter Graph (AIG) model over the basis U₂ (see `../encod
 - A **formula** (tree) is a circuit in which every *gate* has fan-out exactly 1 (input
   variables may be reused). `tree(f)` = minimum number of AND gates in a formula for `f`.
 - `gap(f) = tree(f) − opt(f) ≥ 0`.
-- A **reconvergence** is an internal AND gate consumed by ≥ 2 distinct gates — fan-out ≥ 2 counting
-  **distinct consuming gates** (the circuit output counts as one consumer); inputs do not count.
-  This matches the at-most-one-shared encoding in `../encoder/n5_forced_test.py`, whose sharing
-  variable `u[i,j]` fires once per consuming gate `j`, regardless of operand-edge multiplicity.
+- A **reconvergence** is an internal AND gate with fan-out ≥ 2. (Inputs do not count — this
+  matches the at-most-one-shared encoding in `zc_certify.py`, whose sharing variables range
+  over gate nodes `n+1,…,n+k` only.)
 - `f` is **forced-multi** if *every* size-optimal circuit for `f` (i.e. with exactly `opt(f)`
   gates) has ≥ 2 reconvergences. Equivalently: "there is an `opt(f)`-gate circuit with ≤ 1
   reconvergence" is unsatisfiable.
@@ -130,13 +131,10 @@ By §4, `C'` (obtained by contracting the unique gate `g`, a pass-through to `a`
 reconvergence count, so `C'` has ≤ 1 reconvergence — contradicting that `z` is forced-multi
 (which forces ≥ 2). This contradiction proves `f` is forced-multi.
 
-*The contraction is non-increasing.* **Convention:** fan-out counts **distinct consuming gates**
-(with the circuit output as one consumer) — the same measure the encoding uses; thus every used
-gate has fan-out ≥ 1, and the case "`g` is the output" is just `|S_g| ≥ 1` with the output terminal
-among `g`'s consumers (after contraction the output reads `a`). In a size-optimal circuit no gate
-takes the same source for both inputs (operand order `a<b`, and a doubled input would waste a
-gate), so a gate consumes `g` at most once and edge-multiplicity never arises. Let `g` have
-consumer set `S_g` (`|S_g| = fan-out(g)`).
+*The contraction is non-increasing.* **Convention:** fan-out counts edge-occurrences and the
+circuit output counts as one consumer; thus every used gate has fan-out ≥ 1, and the case
+"`g` is the output" is just `|S_g| ≥ 1` with the output terminal among `g`'s consumers (after
+contraction the output reads `a`). Let `g` have consumer multiset `S_g` (`|S_g| = fan-out(g)`).
 Contracting `g` (pass-through to `a`) removes `g` and makes every consumer in `S_g` read `a`.
 Only `a`'s fan-out changes: from `deg(a)` to `deg(a) − 1 + |S_g|` (it loses `g`, gains `S_g`) —
 and if some consumer already reads both `a` and `g`, distinct-consumer counting makes this an
@@ -172,34 +170,34 @@ This completes the proof of the Lift Lemma. ∎∎
 
 ## The Lift Theorem (unconditional)
 
-The gap=1, forced-multiple-reconvergence functions of this note are called the **forced-reconvergence family**
-(earlier drafts denoted them `Z`). They live in the gap
-framework of arXiv:2603.08033.
+The gap=1, forced-multiple-reconvergence functions of this note are the **forced-reconvergence family**
+ — named for the gap framework of arXiv:2603.08033 in which they live and the
+characterization here; earlier drafts denoted them `Z`.
 
 > **Lift Theorem.** For every `n ≥ 4` there exists a Boolean function on `n` variables that is
 > gap=1 and forced-multi — i.e. the forced-reconvergence family is non-empty at every `n ≥ 4`.
 
-**Proof.** A gap=1 forced-multi function `z₄` exists at `n = 4`: the flagship `0x03de`
-(opt=6, tree=7, forced-multi), reproducible from scratch via
-`../verify/reproduce_witness.py 0x03de 6 --full`. Define
+**Proof.** Claim 0034 exhibits a gap=1 forced-multi function `z₄` at `n = 4` (e.g. the
+flagship `0x03de`, opt=6, tree=7, forced-multi UNSAT DRAT-certified). Define
 `z_{n+1} := z_n ∧ x_{n+1}`. By the Lift Lemma each `z_n` is gap=1 and forced-multi at `n`
 variables. ∎
 
-So this phenomenon is genuinely infinite, not an artifact of `n = 4`.
+This turns the conditional "Consequence" of `technote_z_generalization.md` into a theorem: the
+forced-reconvergence phenomenon is genuinely infinite, not an artifact of `n = 4`.
 
 ---
 
 ## Corroboration (independent of the proof)
 
-- **n = 3 exhaustive** (opt sweep): `opt(z∧x)=opt(z)+1` and `opt(z∨x)=opt(z)+1` over **all 218
-  essential `n=3` functions** — 0 violations, 0 inconclusive. This exhaustively corroborates the
-  lower bound of §3.
+- **n = 3 exhaustive** (`lift_lemma_empirical_test.py`, opt sweep): `opt(z∧x)=opt(z)+1` and
+  `opt(z∨x)=opt(z)+1` over **all 218 essential `n=3` functions** — 0 violations, 0 inconclusive.
+  This exhaustively corroborates the lower bound of §3.
 - **n = 4 → 5 → 6 DRAT witnesses:** `0x03de` → `0x03de0000` → `0x3de000000000000`, each
-  gap=1 forced-multi, all `s VERIFIED`.
-- **Forced-multi inheritance probe:** over the six n=4 forced-multi classes lifted to n=5, **0 lost
-  forced-multi** — `0x03de∧x4` and `0x03de∨x4` both certify forced-multi (at-most-one-shared
-  UNSAT); the rest time out (SAT at n=5 is heavy) without any flipping to not-forced-multi.
-  Corroborates §6.
+  gap=1 forced-multi, all `s VERIFIED` (SHAs in `certs/`, ledger claim 0035).
+- **Forced-multi inheritance probe** (`lift_lemma_empirical_test.py` test 3): over the six n=4
+  forced-reconvergence classes lifted to n=5, **0 lost forced-multi** — `0x03de∧x4` and `0x03de∨x4` both certify
+  forced-multi (at-most-one-shared UNSAT); the rest time out (SAT at n=5 is heavy) without any
+  flipping to not-forced-multi. Corroborates §6.
 
 *Note on the elimination step.* A restriction-based "gate count" probe that flags only gates
 becoming **constant** will report zero eliminations here, because the eliminated gate `g`

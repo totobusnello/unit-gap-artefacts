@@ -1,13 +1,13 @@
-"""Forced-multi test at n=5 — does the n=4 Z phenomenon (forced multiple
+"""EXP-AIG-N5 forced-multi test — does claim 0034's Z phenomenon (forced multiple
 reconvergence) generalize to n=5? Given a gap=1 n=5 function, certify by SAT+DRAT whether
 EVERY size-optimal AIG has >=2 fan-out->=2 gates.
 
-Defines the at-most-one-shared encoding (build_amo_shared below), generalized
+Reuses the at-most-one-shared encoding from zc_certify.py (there hardcoded N=4), generalized
 to arbitrary N. Chain per function:
   (1) opt(f) = OPT : circuit UNSAT k=1..OPT-1 (DRAT) + witness k=OPT (verify_circuit).
   (2) tree(f) = OPT+1 (gap=1): formula UNSAT k=OPT (DRAT) + witness k=OPT+1.
   (3) forced-multi : "exists opt-gate AIG with <=1 fan-out->=2 gate" is UNSAT (DRAT).
-UNSAT in (3) ==> forced multiple reconvergence at n=5 (single reconvergence impossible).
+UNSAT in (3) ==> Z-like at n=5 (single reconvergence impossible) ==> 0034 generalizes.
 
 Usage: python3 n5_forced_test.py <tt_int> <opt>
 """
@@ -15,7 +15,7 @@ import sys
 import os
 from itertools import combinations
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # aig_exact is a sibling module
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "exp_gate_0001"))
 from aig_exact import AIGEncoder, verify_circuit  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from zc_certify import write_cnf, kissat, drat_verify, sha16, CERTS  # noqa: E402
@@ -23,20 +23,31 @@ from zc_certify import write_cnf, kissat, drat_verify, sha16, CERTS  # noqa: E40
 N = 5
 
 
-def build_amo_shared(tt, opt, n=N, gate_order_sb=False, gate_order_b=False):
+def build_amo_shared(tt, opt, gate_order_sb=False, gate_order_b=False, n=None):
     """Base circuit encoder (k=opt) + at-most-one-shared. Sound direction: fan-out>=2 => z.
 
-    gate_order_sb (default False = byte-identical to the vetted, symmetry-break-free path):
+    `n=None` cai no global do MÓDULO, que é 5. Isso era uma armadilha silenciosa entre módulos, achada
+    por Codex REV-0100: `reproduce_witness.py` passou a definir seu próprio `N` por testemunha (para
+    servir a base n=4), mas mudar `reproduce_witness.N` não altera o `N` DESTE módulo — de modo que
+    `reproduce_witness.py 0x03de --full` construiria uma instância de CINCO variáveis, rotulada `n4`, e
+    o leg poderia dar PASS sobre o objeto errado. O `main` daqui já sobrescrevia via `globals()["N"]`
+    (linha ~103), o que funciona para execução direta e não para import — a pior combinação, porque
+    parece resolvido. Agora `n` é parâmetro; quem importa deve passá-lo explicitamente.
+
+    gate_order_sb (default False = byte-identical to the vetted path):
     *** UNSOUND — DO NOT USE FOR CERTIFICATION. Kept only for the record. ***
-    This adds a gate-ordering constraint (order NON-OUTPUT gates 1..k-1 by operand 4-tuple
-    (a,pa,b,pb) via adjacent-pair clauses, output gate exempt). It is NOT a valid WLOG break: a
-    concrete counterexample (tt=0x80008000: an optimal fan-out-1 circuit g1=x2&x3 (2,0,3,0) ->
-    g2=x1&g1 (1,0,6,0) whose topology forces a DECREASING tuple) shows lex order on `a` is
-    incompatible with the topological constraint (a just-placed node enters the next gate as its
-    LARGER operand b). Hence gate_order_sb=True can turn a truly-SAT amo-shared instance UNSAT =>
-    it does NOT certify forced-multi. Ordering by the larger operand b (below) is the repair.
-    The trusted path uses NO ordering at all (both flags False)."""
-    enc = AIGEncoder(n, opt, tt).build()
+    This adds a gate-ordering symmetry break (order NON-OUTPUT gates 1..k-1 by operand 4-tuple
+    (a,pa,b,pb) via adjacent-pair clauses, output gate exempt). It was CONJECTURED WLOG (Kimi
+    REV-0082) and wrongly confirmed by Grok REV-0083, but Codex REV-0085 found a concrete
+    counterexample (tt=0x80008000: an optimal fan-out-1 circuit g1=x2&x3 (2,0,3,0) -> g2=x1&g1
+    (1,0,6,0) whose topology forces a DECREASING tuple, so the SB forbids a valid circuit). Lex
+    order on `a` is incompatible with the topological constraint (a just-placed node enters the
+    next gate as its LARGER operand b). Hence gate_order_sb=True can turn a truly-SAT amo-shared
+    instance UNSAT => it does NOT certify forced-multi. A topology-compatible ordering (by the
+    larger operand b) is a possible repair, but needs independent-family panel vetting BEFORE
+    any reliance. Empirical validation on known instances is necessary but NOT sufficient."""
+    nn = N if n is None else n
+    enc = AIGEncoder(nn, opt, tt).build()
     nvars = enc.nvars
     clauses = list(enc.clauses)
     k = opt
@@ -48,13 +59,13 @@ def build_amo_shared(tt, opt, n=N, gate_order_sb=False, gate_order_b=False):
                     if (a2, pa2, b2, pb2) < ti:   # tuple(i) > tuple(i+1): forbid this pairing
                         clauses.append([-s, -s2])
     if gate_order_b:
-        # Repair of the a-ordering above: order NON-OUTPUT gates by the LARGER operand b FIRST
-        # (key = (b,a,pa,pb)) instead of by a. Rationale: a gate that becomes available only after
-        # some node j is placed uses j as its larger operand b, so b tracks topological depth =>
-        # ordering by non-decreasing b is compatible with the topological constraint (unlike
-        # ordering by a), and it admits the a-ordering counterexample circuit. This is a
-        # WLOG-ordering (a dominance argument), off the trusted path; its machine-certified
-        # version is future work. Output gate k exempt.
+        # REPAIR candidate (Codex REV-0085 diagnosis): order NON-OUTPUT gates by the LARGER
+        # operand b FIRST (key = (b,a,pa,pb)) instead of by a. Rationale: a gate that becomes
+        # available only after some node j is placed uses j as its larger operand b, so b tracks
+        # topological depth => ordering by non-decreasing b is compatible with the topological
+        # constraint (unlike ordering by a). This ADMITS Codex's counterexample circuit. Whether
+        # it is truly WLOG is UNDER PANEL REVIEW — do NOT rely on a verdict from it until an
+        # independent family proves it sound. Output gate k exempt.
         for i in range(1, k - 1):
             for (a, pa, b, pb, s) in enc.options[i]:
                 ki = (b, a, pa, pb)
@@ -69,7 +80,7 @@ def build_amo_shared(tt, opt, n=N, gate_order_sb=False, gate_order_b=False):
 
     u = {}
     for i in range(1, k):
-        node = n + i
+        node = nn + i
         users = []
         for j in range(i + 1, k + 1):
             refs = [o[4] for o in enc.options[j] if o[0] == node or o[2] == node]
@@ -95,7 +106,6 @@ def cnf_of(enc, path):
 
 
 def main():
-    os.makedirs(CERTS, exist_ok=True)
     tt = int(sys.argv[1], 0)
     opt = int(sys.argv[2])
     if len(sys.argv) > 3:
@@ -125,7 +135,13 @@ def main():
     if rc != 10:
         print(f"  !!! k={opt} not SAT — opt>{opt}. ABORT."); return 1
     gates, op = enc.decode(model)
-    print(f"  opt-UB k={opt}: SAT verify_circuit={verify_circuit(N, tt, gates, op)}")
+    vc = verify_circuit(N, tt, gates, op)
+    print(f"  opt-UB k={opt}: SAT verify_circuit={vc}")
+    if not vc:
+        # REV-0004 exists precisely so a False here cannot slide by as printed text (Kimi
+        # REV-0097 finding 6a: verify_circuit results were reported, never asserted).
+        print(f"  !!! witness does not compute tt — k={opt} leg NOT established. ABORT.")
+        return 1
 
     # (2) tree: formula UNSAT k=opt (=> tree>=opt+1) + witness k=opt+1
     enc = AIGEncoder(N, opt, tt, formula=True).build()
@@ -153,7 +169,7 @@ def main():
     if rc == 10:
         print(f"  forced-multi: at-most-1-shared SAT => a single-reconvergence optimum EXISTS "
               f"(NOT forced-multi; conforming like most n=4 gap=1).")
-        print(f"\n  VERDICT [{tag}]: gap=1 but NOT forced-multi (single reconvergence possible).")
+        print(f"\n  VERDICT [{tag}]: gap=1 but NOT Z-like (single reconvergence possible).")
         return 0
     if rc != 20:
         print(f"  forced-multi: kissat rc={rc} (neither SAT nor UNSAT — timeout/error). INCONCLUSIVE.")
@@ -161,8 +177,8 @@ def main():
     ver = drat_verify(cnf, drat)
     print(f"  forced-multi: at-most-1-shared UNSAT (drat-trim={'VERIFIED' if ver else 'FAIL'}) "
           f"cnf_sha={sha16(cnf)} drat_sha={sha16(drat)}")
-    print(f"\n  *** VERDICT [{tag}]: FORCED MULTIPLE RECONVERGENCE at n={N}. "
-          f"the n=4 phenomenon GENERALIZES (opt LB DRAT={ok_lb}, tree gap=1={tree_ok}, "
+    print(f"\n  *** VERDICT [{tag}]: FORCED MULTIPLE RECONVERGENCE at n={N} — Z-like. "
+          f"Claim 0034's phenomenon GENERALIZES (opt LB DRAT={ok_lb}, tree gap=1={tree_ok}, "
           f"forced-multi DRAT={ver}). ***")
     return 0
 

@@ -1,11 +1,11 @@
 """
-Encoder de exact synthesis AIG via SAT.
+EXP-GATE-0001 — Encoder de exact synthesis AIG via SAT (gate de qualificação da FASE 5).
 
 Pergunta codificada: "existe circuito AIG com exatamente k portas AND que computa f?"
-Modelo AIG: portas AND de 2 entradas,
+Modelo AIG (convenção do catálogo SRC-0019/0027): portas AND de 2 entradas,
 inversões livres em qualquer aresta e na saída; tamanho = número de portas AND.
 
-Semântica do encoding (validada contra enumeração independente):
+Semântica do encoding (validada no G3 contra enumeração independente):
 - Nós: entradas 1..n (valores fixos por linha da truth table), portas n+1..n+k.
 - Cada porta i escolhe (one-hot) uma opção (a, pa, b, pb): operandos a < b
   dentre nós anteriores, com polaridades pa, pb.
@@ -16,8 +16,8 @@ Semântica do encoding (validada contra enumeração independente):
   porta posterior.
 - k=0 tratado fora do SAT (f constante ou literal).
 
-NOTE: a DRAT proof certifies the CNF, not the encoding — hence the independent
-cross-enumeration check and the per-circuit simulation (verify_circuit) of every SAT model.
+REGRA REV-0004: prova DRAT certifica a CNF, não o encoding — por isso o G3
+(enumeração cruzada) e a verificação por simulação de todo circuito SAT.
 """
 
 from itertools import combinations
@@ -70,7 +70,8 @@ class AIGEncoder:
             for a, pa, b, pb, s in self.options[i]:
                 for t in range(self.rows):
                     x = self.v[(i, t)]
-                    # constantes 0/1 e literais DIMACS ±1 são tipos separados (evita colisão).
+                    # BUGFIX (pego pelo G1-verify na 1ª execução): constantes 0/1
+                    # colidiam com literais DIMACS ±1 — agora tipos separados.
                     ka, la = self._lit(a, pa, t)  # ('const', 0|1) ou ('lit', ±var)
                     kb, lb = self._lit(b, pb, t)
                     # x <-> la AND lb, condicionado a s
@@ -85,9 +86,11 @@ class AIGEncoder:
                     else:
                         c.append([-s, -x, la]); c.append([-s, -x, lb])
                         c.append([-s, x, -la, -lb])
-        # QUEBRA DE SIMETRIA (WLOG em k=opt): duas portas nunca selecionam a MESMA
-        # opção (a,pa,b,pb) — um circuito MÍNIMO nunca tem portas duplicadas (remover
-        # a duplicata daria um circuito menor), logo toda solução relevante é livre de duplicatas.
+        # QUEBRA DE SIMETRIA (sound p/ a pergunta "opt = k?"): duas portas nunca
+        # selecionam a MESMA opção (a,pa,b,pb) — um circuito MÍNIMO nunca tem
+        # portas duplicadas (remover a duplicata daria circuito menor). Como a
+        # sonda pergunta k=9 com opt ∈ {9,10} (catálogo), toda solução relevante
+        # é mínima, logo livre de duplicatas. [EXP-PROBE-0001 v2]
         # QUEBRA DE SIMETRIA — só no modo CIRCUITO. Num modo FÓRMULA (árvore), uma
         # subárvore pode aparecer DUPLICADA (é a razão de tree>opt); proibir
         # duplicatas excluiria fórmulas mínimas válidas e daria UNSAT FALSO
@@ -155,7 +158,7 @@ def simulate(n, gates, out_pol, t):
 
 
 def verify_circuit(n, tt, gates, out_pol):
-    """VERIFICAÇÃO SEMÂNTICA: circuito bate com a truth table inteira?"""
+    """VERIFICAÇÃO SEMÂNTICA (regra REV-0004): circuito bate com a truth table inteira?"""
     return all(simulate(n, gates, out_pol, t) == tt_bit(tt, t) for t in range(1 << n))
 
 
