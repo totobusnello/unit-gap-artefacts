@@ -20,30 +20,34 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
   every n ≥ 4. Corroborated by DRAT at n = 4, 5, 6.
 - **Density**: at n = 5 the family exceeds its own lift closure — witness `f = 0x03de ∧ (¬x₀ ∨ x₄)`
   (`0x03de0154`): non-canalizing, opt = 8, tree = 9 (gap = 1), forced-multi. Counting NPN classes,
-  n = 5 has **at least ten** — six lifts plus **four non-lifts** — and the ten are checked pairwise
-  distinct by exhaustive canonicalisation over the full NPN group, in pure Python with no solver.
-  So the family is a genuine object, not one small case propagated by a construction.
+  n = 5 has **at least fifteen** — **eleven** lift classes plus **four non-lifts** — all checked
+  pairwise distinct by exhaustive canonicalisation over the full NPN group, in pure Python with no
+  solver. So the family is a genuine object, not one small case propagated by a construction.
+  *Corrected 2026-08-11:* this said "at least ten" because the counting script generated only the
+  AND-lifts while the Lift Theorem covers `z ∧ x` **and** `z ∨ x`. Counting both directions the lift
+  closure is 11 classes, not 6 — 6 + 6 with exactly one collision, at the single NP-self-complementary
+  class among the six. Found by Kirill Krinkin, reading the artefacts without a solver.
 - **The count splits by trust path, and this file states the split rather than averaging it.** Two of
   the four non-lifts — `0x03de0154` and `0x09c50800` — have their forced-multi certificate produced
   **with no symmetry breaking at all** (vetted encoder, `gate_order_b = False`), and those are the two
   whose CNF hashes are pinned in `verify/manifest.csv`. The other two (`0xabfe03de`,
   `0x57df03de`) were certified **through the `gate_order_b` WLOG-ordering**, so no no-SB CNF exists to
   pin for them. Therefore:
-  - **`F₅ ≥ 8` needs no symmetry-breaking argument** — six lifts (by the Lift Theorem, from the
-    no-SB-certified n = 4 base) plus those two pinned non-lifts;
-  - **`F₅ ≥ 10`** additionally rests on the soundness of that ordering, which is a lemma proved by
+  - **`F₅ ≥ 13` needs no symmetry-breaking argument** — the eleven lift classes (by the Lift Theorem,
+    from the no-SB-certified n = 4 base) plus those two pinned non-lifts;
+  - **`F₅ ≥ 15`** additionally rests on the soundness of that ordering, which is a lemma proved by
     three independent analyses — not a certificate.
 
   **What this does not weaken:** the conjecture that the family is only its lift closure needs just
   **one** non-canalizing forced-multi gap-1 function to fall, and `0x03de0154` is one whose forcedness
   is pinned without any ordering argument. The headline — *the family exceeds its own closure* — sits
-  entirely on the no-SB path. The ordering-dependent pair raises the count from 8 to 10 and carries no
+  entirely on the no-SB path. The ordering-dependent pair raises the count from 13 to 15 and carries no
   other weight. An earlier version of this file said "at least ten" without the split; the correction
   is dated 2026-08-11 and came from an adversarial audit (Codex REV-0107).
 
-A **tenth class** (`0x09c50800`) completes the count, and it is the interesting one: every earlier
-witness came from a directed sweep on one family, while this one fell out of a random census. See
-*A tenth class, and where it came from* below.
+One of the four non-lifts, **`0x09c50800`**, is the interesting one: every other witness came from a
+directed sweep on one family, while this one fell out of a random census. Existence-by-construction and
+existence-by-accident are evidence of different kinds. See *A class nobody aimed at* below.
 
 This is a structural result in exact circuit synthesis — **not asymptotic, not a lower bound.**
 
@@ -71,37 +75,74 @@ python3 verify/reproduce_witness.py --full     # also the forced-multi no-SB cer
                                                      #   (247 MB DRAT, ~minutes; ZERO symmetry breaking)
 ```
 
+### What ships as a proof, and what you must regenerate — updated 2026-08-11
+
+The bundle now carries the **complete `opt` chain of the flagship witness `0x03de0154`**: CNF **and**
+DRAT for every `k = 1..7`, about 35 MB, of which the `k = 7` proof alone is 27.9 MB. That is a
+deliberate exception to this file's own "reproducibility, not blobs" principle, declared and dated in
+`tools/blob_exceptions.txt`, and it is the only one.
+
+The reason: `opt ≥ 8` **is** the UNSAT at `k = 7`. Without that proof shipped, the refutation of the
+lift-closure conjecture is not checkable by a reader who has `drat-trim` but declines to run a SAT
+solver — a legitimate reviewer stance, and exactly where Kirill Krinkin stopped when he checked these
+artefacts without a solver on 2026-08-11. Every leg was verified on **two machines with independently
+built `drat-trim`** (a Linux VPS and a Mac): `s VERIFIED` on both.
+
+So, with `drat-trim` alone and no solver at all:
+
+```sh
+cd verify/sample_certs
+for k in 1 2 3 4 5 6 7; do drat-trim n5_0x03de0154_opt_k$k.cnf n5_0x03de0154_opt_k$k.drat; done
+```
+
+Seven `s VERIFIED` lines give `opt(0x03de0154) ≥ 8`; with the `k = 8` model — a circuit, re-simulated
+rather than solved — that closes `opt = 8`.
+
+**What still needs one solver run, and it is one.** The forced-multi certificate: its DRAT runs to
+hundreds of megabytes (the sibling witness's is 379 MiB), so it cannot ship and its CNF hash is pinned
+instead (`ed3b8350f72f8078`). It regenerates in about 66 s with `kissat --unsat`. That same UNSAT is
+what gives `tree ≥ 9`, hence `tree = 9`. Stating the cost beats leaving a gap for the reader to find.
+
+The second no-symmetry-breaking witness, `0x09c50800`, ships at `k ≤ 4` and regenerates the rest. Its
+value is **provenance** — it fell out of a random census rather than a directed sweep — and its chain
+has the same shape as the flagship's, so duplicating 30 MB would add bytes, not evidence.
+
 The script prints the SHA of each regenerated CNF; compare against `verify/manifest.csv`
 (claim → leg → CNF SHA → verdict). The forced-multi leg's CNF SHA is pinned there
 (`ed3b8350f72f8078`) and regenerates byte-identically on any machine.
 
-**Zero-setup spot check** (only `drat-trim` needed): committed sample certificates for the opt
-lower bound, k = 1..4, live in `verify/sample_certs/`:
+**Zero-setup spot check** (only `drat-trim` needed). Committed certificates live in
+`verify/sample_certs/`: the **full** opt chain `k = 1..7` for the flagship (see above), and
+`k ≤ 4` for the other witnesses. One leg, to see the shape:
 
 ```sh
 drat-trim verify/sample_certs/n5_0x03de0154_opt_k3.cnf \
           verify/sample_certs/n5_0x03de0154_opt_k3.drat   # expect: s VERIFIED
 ```
 
-## Count the classes (F₅ ≥ 10)
+## Count the classes (F₅ ≥ 15)
 
 ```sh
-python3 verify/npn_check_f5.py
+python3 experiments/npn_check_f5.py [private tree]
 ```
 
-Pure Python, no solver: canonicalizes all ten witnesses over the full n = 5 NPN group (all 7680
-transforms) and confirms ten distinct classes. The count prints **decomposed by provenance** — six
-lifts, three from a directed sweep, one from a random census — because that split, not the total, is
-the substance of the density claim.
+Pure Python, no solver, seconds to run: canonicalizes every witness over the full n = 5 NPN group (all
+7680 transforms) and reports **15** distinct classes — **11** in the lift closure (6 AND-lifts + 6
+OR-lifts, exactly one collision) plus the 4 non-lifts. It also asserts *why* there is exactly one
+collision: `OR-lift(z) ≅ AND-lift(¬z)` under NPN spends the output negation, so the two lifts of `z`
+coincide iff `z` is NP-self-complementary, and exactly one of the six n = 4 classes is. The check fails
+loudly if that explanation ever stops holding.
+
+The older `npn_check_f5.py` is superseded: it lifted only by AND and therefore reported 10.
 
 This script establishes **distinctness**, which is solver-free and therefore the cheapest part to
 trust. It does **not** establish that each of the ten is forced-multi; that comes per witness from the
 certificates, and two of the four non-lifts get theirs through the `gate_order_b` WLOG-ordering rather
 than the no-SB path — see *What is claimed* above, and `manifest.csv`, which pins CNF hashes only for
-the two no-SB witnesses. A reader who accepts only plain DRAT gets `F₅ ≥ 8`; the ordering lemma takes
-it to 10.
+the two no-SB witnesses. A reader who accepts only plain DRAT gets `F₅ ≥ 13`; the ordering lemma takes
+it to 15.
 
-## A tenth class, and where it came from
+## A class nobody aimed at
 
 The tenth witness is **`0x09c50800`**. Reproduce it through the same script:
 
@@ -119,7 +160,7 @@ established witness.
 What makes it worth its own section: every earlier witness came from a **directed sweep** on the
 `0x03de` family — we knew where to look — while this one fell out of a **random census** of 14,466
 truth tables, with no such knowledge. Existence-by-construction and existence-by-accident are
-evidence of different kinds, and the family having both is what the tenth class contributes. The
+evidence of different kinds, and the family having both is what this witness contributes. The
 count going 9 → 10 is the less interesting half.
 
 **One in 14,466 is a yield, not a density — and the distinction is not pedantic here.** The census
