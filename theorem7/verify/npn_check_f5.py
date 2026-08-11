@@ -1,136 +1,196 @@
-"""Independent NPN-class check for F5 >= 10 (claim 0037 ressalva 1; 10th class by claim 0038).
+"""F5 with BOTH lift directions — the count was low because the script only lifted by AND.
 
-Gold-standard canonicalization: brute-force over the FULL NPN group for n=5
-(5! input perms x 2^5 input negations x 2 output negation = 7680 elements),
-taking the lexicographically-minimum 32-bit truth table as the canonical form.
-No hand-rolled heuristic. Two functions are in the same NPN class iff they have
-the same canonical form.
+Found by Kirill Krinkin, 2026-08-11, reading the artefacts without a solver: "your lemma covers the
+OR-lifts, npn_check_f5.py lifts only by AND". He is right. `npn_check_f5.py` builds its lift set as
+`{z << 16 for z in F4}`, which is `z AND x4` and nothing else, while the Lift Lemma (claim 0036)
+proves the statement for `z AND x_new` **and** `z OR x_new`. So the published count of 10 undercounted
+its own closure.
 
-Confirms: the 3 non-canalizing forced-multi gap=1 winners are pairwise NPN-distinct
-AND distinct from the 6 AND-lifts of the F4 classes, and that the census witness
-`0x09c50800` is distinct from all nine  =>  F5 >= 10.
-Also independently re-verifies canalizing status (lifts canalizing; winners not).
+This script counts both directions. It is pure Python over the full NPN group of n=5 (all
+5!*2^5*2 = 7680 transforms) — no solver, so anyone can re-run it in seconds and the result depends on
+no certificate.
 
-The count is printed DECOMPOSED BY PROVENANCE (lifts / directed sweep / random census), because
-that split is the actual argument of §6 of the paper: the family has two independent origins, and
-a bare "10" hides the one number a referee cares about — how many appeared without anyone knowing
-where to look.
+RESULT (2026-08-11): **F5 >= 15**, not 10. Decomposed:
+  * 6 AND-lifts  -> 6 distinct classes
+  * 6 OR-lifts   -> 6 distinct classes
+  * exactly ONE collision between the two sets, so the lift closure is **11** classes, not 6
+  * 4 non-lift witnesses, pairwise distinct and distinct from all lifts
+  => 11 + 4 = 15
+
+WHY EXACTLY ONE COLLISION, and it is not a coincidence. Under NPN of the 5-variable function,
+`OR-lift(z) = 0xFFFF0000 | z` maps to `AND-lift(~z)`: negate the output, then negate x4. The output
+negation of the 5-variable function is spent doing that, so two AND-lifts coincide only under the
+subgroup that fixes x4 — permutations and INPUT negations of the four original variables, without
+output negation. Therefore
+
+    OR-lift(z) ~ AND-lift(z)   <=>   ~z is NP-equivalent to z   (NP = perms + input negations only)
+                               <=>   z is NP-self-complementary.
+
+Of the six n=4 classes exactly one, `0x178e`, is NP-self-complementary — checked below — and it is
+exactly the one whose two lifts collide. The check prints the per-class verdict so the explanation is
+falsifiable rather than decorative.
+
+RECONCILIATION with the number in Krinkin's letter. He wrote "F_5 >= 14, not 9". 14 = 11 lifts + 3
+non-lifts: he had the three witnesses from the directed sweep, not the fourth (`0x09c50800`, promoted
+2026-08-10, after the letter he was answering). Our 15 = 11 + 4. The two computations agree exactly;
+his arithmetic also requires exactly one AND/OR collision, which is independent confirmation of the
+structural fact above.
+
+Usage: python3 npn_check_f5.py
 """
+from collections import defaultdict
 from itertools import permutations
 
-N = 5
-ROWS = 1 << N
-MASK = (1 << ROWS) - 1
+N5, N4 = 5, 4
+R5, R4 = 1 << N5, 1 << N4
+M5, M4 = (1 << R5) - 1, (1 << R4) - 1
+P5, P4 = list(permutations(range(N5))), list(permutations(range(N4)))
+
+F4 = [0x0358, 0x0359, 0x03DE, 0x06B5, 0x07BC, 0x178E]
+NONLIFTS = {
+    "0x03de0154": 0x03DE0154,   # directed sweep, no-SB certificate
+    "0xabfe03de": 0xABFE03DE,   # directed sweep, gate_order_b
+    "0x57df03de": 0x57DF03DE,   # directed sweep, gate_order_b
+    "0x09c50800": 0x09C50800,   # random census, no-SB certificate
+}
 
 
-def apply_transform(tt, perm, negmask):
-    """g(a2) = f(a), where a2 is a with inputs negated (negmask) then permuted (perm[i]=dest bit)."""
-    new = 0
-    for a in range(ROWS):
-        a2 = 0
-        for i in range(N):
-            bit = (a >> i) & 1
-            if (negmask >> i) & 1:
-                bit ^= 1
-            a2 |= bit << perm[i]
-        if (tt >> a) & 1:
-            new |= 1 << a2
-    return new
+def apply_t(tt, perm, neg, n):
+    rows, out = 1 << n, 0
+    for a in range(rows):
+        b = 0
+        for i in range(n):
+            if (a >> i) & 1:
+                b |= 1 << perm[i]
+        b ^= neg
+        if (tt >> b) & 1:
+            out |= 1 << a
+    return out
 
 
-def npn_canon(tt):
+def npn_canon(tt, n=N5):
+    perms = P5 if n == N5 else P4
+    mask = M5 if n == N5 else M4
     best = None
-    perms = list(permutations(range(N)))
-    for perm in perms:
-        for negmask in range(1 << N):
-            g = apply_transform(tt, perm, negmask)
-            for out in (g, (~g) & MASK):
-                if best is None or out < best:
-                    best = out
+    for p in perms:
+        for neg in range(1 << n):
+            g = apply_t(tt, p, neg, n)
+            for x in (g, (~g) & mask):
+                if best is None or x < best:
+                    best = x
     return best
 
 
-def is_canalizing(tt):
-    """Some variable has a constant cofactor (=> AND/OR-lift direction). NPN-invariant property."""
-    for i in range(N):
-        for val in (0, 1):
-            bits = [(tt >> a) & 1 for a in range(ROWS) if ((a >> i) & 1) == val]
-            if all(b == 0 for b in bits) or all(b == 1 for b in bits):
-                return True
-    return False
+def np_orbit_no_output_neg(tt):
+    """Perms + INPUT negations only. Output negation is deliberately excluded — see the docstring."""
+    return {apply_t(tt, p, neg, N4) for p in P4 for neg in range(1 << N4)}
 
 
-winners = {
-    "0x03de0154": 0x03de0154,   # 0x03de & (~x0 | x4)
-    "0xabfe03de": 0xabfe03de,   # 0x03de | (x0 & x4)
-    "0x57df03de": 0x57df03de,   # 0x03de | (~x0 & x4)
-}
-# 6 F4 classes lifted by AND x4  (z & x4  ==  z << 16 as a 32-bit tt; x4 is the MSB, bit 4)
-f4 = [0x0358, 0x0359, 0x03de, 0x06b5, 0x07bc, 0x178e]
-lifts = {f"lift(0x{z:04x})": (z << 16) for z in f4}
-# The 10th class, PROMOTED 2026-08-10 (claim 0038): first forced-reconvergence witness found by random sampling rather
-# than by a directed sweep on the flagship family. Chain certified no-SB — forced-multi UNSAT +
-# drat-trim (decide_pending.py), opt=8 by UNSAT k=1..7 + SAT witness, tree=9 by fan-out-1 formula
-# witness (cert_chain.py) — and passed the 3-family panel 3/3 GO (REV-0096/0097/0098). Listed here so
-# its NPN distinctness is a re-runnable artifact rather than a literal quoted in a note (Kimi REV-0097
-# finding 5a).
-#
-# It sat in `candidates` while awaiting the promotion rule, and this dict stayed behind after the rule
-# was satisfied: the script kept printing "F5 >= 9 established" plus "10 if the candidate chains
-# hold" for a day after the chains had held and the claim was VERIFIED. The separation was right
-# BEFORE promotion and became stale the moment it happened — the lesson being that a "pending" bucket
-# needs an owner, or it silently understates the result.
-promoted_2026_08_10 = {
-    "0x09c50800": 0x09C50800,
-}
-# Nothing is awaiting promotion right now. New witnesses go here first, and move up once the panel
-# clears them — keeping the printed count honest in both directions.
-candidates = {}
+def and_lift(z):
+    return z << 16            # z AND x4 : high half = z, low half = 0
 
-ALL = {**winners, **lifts, **promoted_2026_08_10, **candidates}
 
-print("=== canalizing re-check ===")
-for name, tt in ALL.items():
-    print(f"  {name}: canalizing={is_canalizing(tt)}")
+def or_lift(z):
+    return z | (0xFFFF << 16)  # z OR x4 : low half = z, high half = all ones
 
-print("\n=== NPN canonical forms (exhaustive 7680-element group) ===")
-canon = {}
-for name, tt in ALL.items():
-    c = npn_canon(tt)
-    canon[name] = c
-    print(f"  {name:16s} -> {c:#010x}")
 
-classes = {}
-for name, c in canon.items():
-    classes.setdefault(c, []).append(name)
-print(f"\n=== distinct NPN classes among the {len(canon)} functions: {len(classes)} ===")
-for c, names in classes.items():
-    print(f"  {c:#010x}: {names}")
+# The two lift formulas must reproduce the witnesses already in the ledger (claim 0035), or the
+# convention is wrong and every count below is wrong with it.
+assert and_lift(0x03DE) == 0x03DE0000, hex(and_lift(0x03DE))
+assert or_lift(0x03DE) == 0xFFFF03DE, hex(or_lift(0x03DE))
+print("convention check OK: and_lift(0x03de)=0x03de0000, or_lift(0x03de)=0xffff03de (claim 0035)\n")
 
-winner_canons = {canon[n] for n in winners}
-lift_canons = {canon[n] for n in lifts}
-census_canons = {canon[n] for n in promoted_2026_08_10}
-cand_canons = {canon[n] for n in candidates}
-print(f"\nwinners pairwise-distinct: {len(winner_canons)==len(winners)} ({len(winner_canons)}/3)")
-print(f"winners disjoint from lifts: {winner_canons.isdisjoint(lift_canons)}")
-print(f"lifts pairwise-distinct: {len(lift_canons)==len(lifts)} ({len(lift_canons)}/6)")
-print(f"census witness disjoint from all above: "
-      f"{census_canons.isdisjoint(winner_canons | lift_canons)}")
-established = winner_canons | lift_canons | census_canons
-# A contagem sai decomposta POR PROVENIÊNCIA, não só como total. O argumento do §6 do P1 é que a
-# família tem duas origens independentes — construção dirigida e censo aleatório — e um total de 10
-# esconde exatamente isso. O número que interessa a um referee é "quantas apareceram sem que se
-# soubesse onde olhar", e a resposta é uma, explicitamente.
-print(f"\n*** F5 >= {len(established)}  (established: {len(lift_canons)} lifts + "
-      f"{len(winner_canons)} by directed sweep + {len(census_canons)} by random census) ***")
+objs = {}
+for z in F4:
+    objs[f"AND(0x{z:04x})"] = and_lift(z)
+    objs[f"OR(0x{z:04x})"] = or_lift(z)
+objs.update(NONLIFTS)
 
-if candidates:
-    print("\n=== candidates (certified chain, pending promotion) ===")
-    for name in candidates:
-        c = canon[name]
-        clash = [n for n, cc in canon.items() if cc == c and n != name]
-        print(f"  {name}: canon={c:#010x} canalizing={is_canalizing(candidates[name])} "
-              f"{'COLLIDES with ' + str(clash) if clash else 'NPN-distinct from all established'}")
-    fresh = cand_canons - established
-    print(f"  distinct new classes: {len(fresh)}  =>  F5 >= {len(established | cand_canons)} "
-          f"if the candidate chains hold")
+canon = {k: npn_canon(v) for k, v in objs.items()}
+groups = defaultdict(list)
+for k, v in canon.items():
+    groups[v].append(k)
+
+and_c = {canon[f"AND(0x{z:04x})"] for z in F4}
+or_c = {canon[f"OR(0x{z:04x})"] for z in F4}
+nl_c = {canon[k] for k in NONLIFTS}
+lift_c = and_c | or_c
+total = len(lift_c | nl_c)
+
+print(f"{len(objs)} functions -> {len(groups)} distinct NPN classes")
+print(f"  AND-lifts: {len(and_c)} classes | OR-lifts: {len(or_c)} classes | "
+      f"lift closure: {len(lift_c)} classes")
+print(f"  collisions between the two lift sets: {len(and_c & or_c)}")
+print(f"  non-lifts: {len(nl_c)} classes, overlap with lifts: {len(nl_c & lift_c)}")
+for v, ks in groups.items():
+    if len(ks) > 1:
+        print(f"  COLLIDING: {' == '.join(sorted(ks))}")
+
+print("\nNP-self-complementary (perms + input negations, NO output negation):")
+predicted = []
+for z in F4:
+    selfc = ((~z) & M4) in np_orbit_no_output_neg(z)
+    collides = canon[f"AND(0x{z:04x})"] == canon[f"OR(0x{z:04x})"]
+    flag = "OK" if selfc == collides else "MISMATCH"
+    if selfc:
+        predicted.append(z)
+    print(f"  0x{z:04x}: self-complementary={selfc!s:5} lifts collide={collides!s:5}  [{flag}]")
+    assert selfc == collides, f"explanation refuted at 0x{z:04x}"
+
+print(f"\nexplanation holds on all six: collisions are exactly the NP-self-complementary classes "
+      f"({', '.join(f'0x{z:04x}' for z in predicted)})")
+print(f"\n*** F5 >= {total}  ({len(lift_c)} lifts + {len(nl_c)} non-lifts) — "
+      f"supersedes the earlier count of 10, which came from a counter that lifted only by AND ***")
+print("Krinkin's letter says 14 = 11 lifts + the 3 non-lifts he had; the fourth was promoted after it.")
+
+# ── THE RESULT AS A COMMITTED ARTEFACT, not a print ────────────────────────────────────────────────
+# Codex REV-0109 blocked on this and was right: the project's own rule is that a number in a claim
+# traces to a committed artefact, and until now `F5 >= 15` traced to this script's stdout plus the
+# answer restated in its own docstring. A script that prints is not an artefact — that exact phrase is
+# in the workspace lessons. The CSV below is the artefact; one row per object, with its canonical form,
+# so a reader can recount the classes with `cut`/`sort -u` and never take the summary line on trust.
+# Written unconditionally at the end (the E37 discipline: no incremental-only write).
+import os  # noqa: E402
+import sys  # noqa: E402
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from artifact_io import ArtefactIncomplete, fail, write_csv_atomic  # noqa: E402
+
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "f5_classes.csv")
+rows = []
+for name in sorted(objs):
+    c = canon[name]
+    if name in NONLIFTS:
+        kind, seed = "non-lift", ""
+    else:
+        kind = "AND-lift" if name.startswith("AND(") else "OR-lift"
+        seed = name[name.index("(") + 1:-1]
+    rows.append({
+        "object": name,
+        "kind": kind,
+        "seed_z_n4": seed,
+        "tt_hex_n5": f"0x{objs[name]:08x}",
+        "npn_canon_n5": f"0x{c:08x}",
+        "class_members": len(groups[c]),
+    })
+# Gate on the artefact itself, enforced by the atomic writer: the row count must match the 16 objects,
+# and the number of DISTINCT canonical forms in the file must equal the count the summary printed. If
+# they disagree the file is a prefix or the grouping drifted, and the final filename never appears.
+distinct_in_file = len({r["npn_canon_n5"] for r in rows})
+
+
+def _invariant(rs):
+    d = len({r["npn_canon_n5"] for r in rs})
+    if d != total:
+        return f"{d} distinct canonical forms in the file against a printed count of {total}"
+    return None
+
+
+try:
+    write_csv_atomic(OUT, ["object", "kind", "seed_z_n4", "tt_hex_n5", "npn_canon_n5", "class_members"],
+                     rows, expected_rows=len(objs), invariant=_invariant, quiet=True)
+except ArtefactIncomplete as e:
+    fail(e)
+print(f"\nartefact written: {os.path.relpath(OUT)} — {len(rows)} objects, "
+      f"{distinct_in_file} distinct NPN classes (recount with: "
+      f"tail -n +2 f5_classes.csv | cut -d, -f5 | sort -u | wc -l)")

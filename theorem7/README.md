@@ -17,17 +17,24 @@ whose *every* size-optimal circuit is forced to reconverge (the **forced-reconve
 ## What is established
 
 At n = 4 the family has exactly six NPN classes, exhaustively. The Lift Theorem (a paper proof,
-corroborated by certificates at n = 4, 5 and 6) makes it non-empty at every n ≥ 4. At n = 5 there are
-**at least ten** distinct classes — six lifts plus four non-lifts — so the family is strictly richer
-than its own closure and is not one small case propagated by a construction. The ten are checked
-pairwise distinct by exhaustive canonicalisation over the full 7680-element NPN group, in pure Python
-with no solver involved.
+corroborated by certificates at n = 4, 5 and 6) makes it non-empty at every n ≥ 4, and it covers both
+`z ∧ x_new` and `z ∨ x_new`. At n = 5 there are **at least fifteen** distinct classes — **eleven** in
+the lift closure plus **four** non-lifts — so the family is strictly richer than its own closure and is
+not one small case propagated by a construction. All fifteen are checked pairwise distinct by exhaustive
+canonicalisation over the full 7680-element NPN group, in pure Python with no solver involved.
+
+The closure holds eleven rather than six because both lift directions are counted: 6 + 6 with exactly
+one collision, which happens at the single NP-self-complementary class among the six — `OR-lift(z)` is
+NPN-equivalent to `AND-lift(¬z)`, so the two lifts of `z` coincide precisely when `¬z` is NP-equivalent
+to `z`. The counter asserts that explanation class by class. An earlier version of this file said "at
+least ten": the count was low because the counting script generated only the AND-lifts, which Kirill
+Krinkin spotted on 2026-08-11 while checking these artefacts without running a solver.
 
 **The count splits by trust path, and `VERIFY.md` states the split instead of averaging it.** Two of
 the four non-lifts carry a forced-multi certificate produced with **no symmetry breaking at all**, and
 those are the two whose CNF hashes are pinned in the manifest; the other two were certified through a
-proved WLOG gate-ordering, for which no no-symmetry-breaking CNF exists to pin. So **`F₅ ≥ 8` needs no
-symmetry-breaking argument** and `F₅ ≥ 10` additionally rests on that ordering lemma. The headline is
+proved WLOG gate-ordering, for which no no-symmetry-breaking CNF exists to pin. So **`F₅ ≥ 13` needs no
+symmetry-breaking argument** and `F₅ ≥ 15` additionally rests on that ordering lemma. The headline is
 unaffected either way: refuting "the family is only its lift closure" needs one non-canalizing witness,
 and one of the two no-symmetry-breaking witnesses is exactly that.
 
