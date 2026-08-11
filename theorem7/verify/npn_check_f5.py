@@ -142,3 +142,55 @@ print(f"\nexplanation holds on all six: collisions are exactly the NP-self-compl
 print(f"\n*** F5 >= {total}  ({len(lift_c)} lifts + {len(nl_c)} non-lifts) — "
       f"supersedes the earlier count of 10, which came from a counter that lifted only by AND ***")
 print("Krinkin's letter says 14 = 11 lifts + the 3 non-lifts he had; the fourth was promoted after it.")
+
+# ── THE RESULT AS A COMMITTED ARTEFACT, not a print ────────────────────────────────────────────────
+# Codex REV-0109 blocked on this and was right: the project's own rule is that a number in a claim
+# traces to a committed artefact, and until now `F5 >= 15` traced to this script's stdout plus the
+# answer restated in its own docstring. A script that prints is not an artefact — that exact phrase is
+# in the workspace lessons. The CSV below is the artefact; one row per object, with its canonical form,
+# so a reader can recount the classes with `cut`/`sort -u` and never take the summary line on trust.
+# Written unconditionally at the end (the E37 discipline: no incremental-only write).
+import os  # noqa: E402
+import sys  # noqa: E402
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from artifact_io import ArtefactIncomplete, fail, write_csv_atomic  # noqa: E402
+
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "f5_classes.csv")
+rows = []
+for name in sorted(objs):
+    c = canon[name]
+    if name in NONLIFTS:
+        kind, seed = "non-lift", ""
+    else:
+        kind = "AND-lift" if name.startswith("AND(") else "OR-lift"
+        seed = name[name.index("(") + 1:-1]
+    rows.append({
+        "object": name,
+        "kind": kind,
+        "seed_z_n4": seed,
+        "tt_hex_n5": f"0x{objs[name]:08x}",
+        "npn_canon_n5": f"0x{c:08x}",
+        "class_members": len(groups[c]),
+    })
+# Gate on the artefact itself, enforced by the atomic writer: the row count must match the 16 objects,
+# and the number of DISTINCT canonical forms in the file must equal the count the summary printed. If
+# they disagree the file is a prefix or the grouping drifted, and the final filename never appears.
+distinct_in_file = len({r["npn_canon_n5"] for r in rows})
+
+
+def _invariant(rs):
+    d = len({r["npn_canon_n5"] for r in rs})
+    if d != total:
+        return f"{d} distinct canonical forms in the file against a printed count of {total}"
+    return None
+
+
+try:
+    write_csv_atomic(OUT, ["object", "kind", "seed_z_n4", "tt_hex_n5", "npn_canon_n5", "class_members"],
+                     rows, expected_rows=len(objs), invariant=_invariant, quiet=True)
+except ArtefactIncomplete as e:
+    fail(e)
+print(f"\nartefact written: {os.path.relpath(OUT)} — {len(rows)} objects, "
+      f"{distinct_in_file} distinct NPN classes (recount with: "
+      f"tail -n +2 f5_classes.csv | cut -d, -f5 | sort -u | wc -l)")

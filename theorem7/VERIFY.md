@@ -133,6 +133,22 @@ collision: `OR-lift(z) ≅ AND-lift(¬z)` under NPN spends the output negation, 
 coincide iff `z` is NP-self-complementary, and exactly one of the six n = 4 classes is. The check fails
 loudly if that explanation ever stops holding.
 
+**The count is a file, not a line of output.** The run writes `verify/f5_classes.csv` — one row per
+object with its canonical form — so you can recount it without trusting the summary, or us:
+
+```sh
+tail -n +2 verify/f5_classes.csv | cut -d, -f5 | sort -u | wc -l                      # 15
+tail -n +2 verify/f5_classes.csv | grep -v non-lift | cut -d, -f5 | sort -u | wc -l   # 11 in the closure
+awk -F, 'NR>1 && $6==2 {print $1}' verify/f5_classes.csv                              # the colliding pair
+```
+
+That file appears only if the run passes its own gate: the row count must match the sixteen objects and
+the number of distinct canonical forms must equal the count printed, or the final filename is never
+written (`verify/artifact_io.py`). An interrupted or inconsistent run leaves a `.partial` you can inspect
+and nothing that looks like a result, so the number above is either right or absent — never silently
+short. We adopted that discipline after four artefacts in one day turned out to be prefixes or stale
+copies wearing a finished file's name.
+
 The older `npn_check_f5.py` is superseded: it lifted only by AND and therefore reported 10.
 
 This script establishes **distinctness**, which is solver-free and therefore the cheapest part to
