@@ -18,9 +18,16 @@ The directory [`theorem7/`](theorem7/) holds a second, self-contained result on 
 a refutation of **Theorem 7** and the positive structure that replaces it. Where Theorem 7 claims a
 unit gap comes from *exactly one* shared gate, the opposite holds and is *forced*: some functions
 have **every** size-optimal AIG carrying ≥ 2 reconvergent (fan-out ≥ 2) gates. A closure (Lift)
-theorem makes the family infinite (for every `n ≥ 4`), and at `n = 5` there is a seventh, non-lift
-class — all reproducible from scratch with `kissat` + `drat-trim`. Start at
-[`theorem7/VERIFY.md`](theorem7/VERIFY.md).
+theorem makes the family infinite (for every `n ≥ 4`), and at `n = 5` there are **at least fifteen**
+classes — eleven in the lift closure plus **four outside it**, so the family is strictly richer than its
+own closure. All reproducible from scratch with `kissat` + `drat-trim`. Start at
+[`theorem7/VERIFY.md`](theorem7/VERIFY.md), which states the count **by trust path** rather than as a
+single number: two classes rest on `n = 5` DRAT alone with no symmetry breaking (enough, by themselves,
+to refute the conjecture that the family is only its closure), thirteen add the Lift theorem — a paper
+proof — and fifteen additionally rest on a proved gate-ordering lemma.
+
+This paragraph said "a seventh, non-lift class" until 2026-08-11. It was not wrong when written, but it
+was three results out of date, and it was the last place in this repository still saying so.
 
 Like the Theorem 2 material, this is a structural result, **not** progress on P vs NP.
 
