@@ -20,8 +20,26 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
   every n ≥ 4. Corroborated by DRAT at n = 4, 5, 6.
 - **Density**: at n = 5 the family exceeds its own lift closure — witness `f = 0x03de ∧ (¬x₀ ∨ x₄)`
   (`0x03de0154`): non-canalizing, opt = 8, tree = 9 (gap = 1), forced-multi. Counting NPN classes,
-  n = 5 has **at least ten** — six lifts plus **four non-lifts** — checked exhaustively over the full
-  NPN group. So the family is a genuine object, not one small case propagated by a construction.
+  n = 5 has **at least ten** — six lifts plus **four non-lifts** — and the ten are checked pairwise
+  distinct by exhaustive canonicalisation over the full NPN group, in pure Python with no solver.
+  So the family is a genuine object, not one small case propagated by a construction.
+- **The count splits by trust path, and this file states the split rather than averaging it.** Two of
+  the four non-lifts — `0x03de0154` and `0x09c50800` — have their forced-multi certificate produced
+  **with no symmetry breaking at all** (vetted encoder, `gate_order_b = False`), and those are the two
+  whose CNF hashes are pinned in `verify/manifest.csv`. The other two (`0xabfe03de`,
+  `0x57df03de`) were certified **through the `gate_order_b` WLOG-ordering**, so no no-SB CNF exists to
+  pin for them. Therefore:
+  - **`F₅ ≥ 8` needs no symmetry-breaking argument** — six lifts (by the Lift Theorem, from the
+    no-SB-certified n = 4 base) plus those two pinned non-lifts;
+  - **`F₅ ≥ 10`** additionally rests on the soundness of that ordering, which is a lemma proved by
+    three independent analyses — not a certificate.
+
+  **What this does not weaken:** the conjecture that the family is only its lift closure needs just
+  **one** non-canalizing forced-multi gap-1 function to fall, and `0x03de0154` is one whose forcedness
+  is pinned without any ordering argument. The headline — *the family exceeds its own closure* — sits
+  entirely on the no-SB path. The ordering-dependent pair raises the count from 8 to 10 and carries no
+  other weight. An earlier version of this file said "at least ten" without the split; the correction
+  is dated 2026-08-11 and came from an adversarial audit (Codex REV-0107).
 
 A **tenth class** (`0x09c50800`) completes the count, and it is the interesting one: every earlier
 witness came from a directed sweep on one family, while this one fell out of a random census. See
@@ -75,6 +93,13 @@ Pure Python, no solver: canonicalizes all ten witnesses over the full n = 5 NPN 
 transforms) and confirms ten distinct classes. The count prints **decomposed by provenance** — six
 lifts, three from a directed sweep, one from a random census — because that split, not the total, is
 the substance of the density claim.
+
+This script establishes **distinctness**, which is solver-free and therefore the cheapest part to
+trust. It does **not** establish that each of the ten is forced-multi; that comes per witness from the
+certificates, and two of the four non-lifts get theirs through the `gate_order_b` WLOG-ordering rather
+than the no-SB path — see *What is claimed* above, and `manifest.csv`, which pins CNF hashes only for
+the two no-SB witnesses. A reader who accepts only plain DRAT gets `F₅ ≥ 8`; the ordering lemma takes
+it to 10.
 
 ## A tenth class, and where it came from
 
