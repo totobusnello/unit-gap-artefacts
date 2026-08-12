@@ -31,19 +31,52 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
   the four non-lifts — `0x03de0154` and `0x09c50800` — have their forced-multi certificate produced
   **with no symmetry breaking at all** (vetted encoder, `gate_order_b = False`), and those are the two
   whose CNF hashes are pinned in `verify/manifest.csv`. The other two (`0xabfe03de`,
-  `0x57df03de`) were certified **through the `gate_order_b` WLOG-ordering**, so no no-SB CNF exists to
-  pin for them. Therefore:
-  - **`F₅ ≥ 13` needs no symmetry-breaking argument** — the eleven lift classes (by the Lift Theorem,
-    from the no-SB-certified n = 4 base) plus those two pinned non-lifts;
-  - **`F₅ ≥ 15`** additionally rests on the soundness of that ordering, which is a lemma proved by
-    three independent analyses — not a certificate.
+  `0x57df03de`) were certified **through the `gate_order_b` WLOG-ordering** until 2026-08-12, when the
+  at-most-one-shared query was re-run for both with the ordering switched off and both closed — UNSAT in
+  214 s and 180 s, `drat-trim` `s VERIFIED`, CNFs `39d9bd8db8daeb8b` and `378fa46181ed496b` now pinned.
+  Therefore:
+  - **all fifteen classes need no symmetry-breaking argument** — the eleven lift classes (by the Lift
+    Theorem, from the no-SB-certified n = 4 base) plus **all four** pinned non-lifts;
+  - **nothing in this bundle rests on the soundness of `gate_order_b`.** The earlier split between
+    `F₅ ≥ 13` certified and `F₅ ≥ 15` with the lemma is retired; it was a budget limit read as a limit of
+    the method, and the budget was the thing that changed.
+
+  This claim is about **this bundle**, and the distinction is load-bearing rather than pedantic. The six
+  `n = 4` classes cited above and all four `n = 5` witnesses carry no-symmetry-breaking certificates — the
+  two `n = 4` witnesses at `opt = 8` needed a larger budget to get there (76 s and 404 s) and got it. The
+  full `n = 4` census is a different story: 36 of its 48 forced verdicts were decided *with* the ordering
+  and are undecidable without it, all in the `gap ≥ 2` region. So "nothing here rests on the lemma" is
+  true of what the headline needs and false of the whole census, and a reader who finds the stronger
+  sentence anywhere should treat it as the error it is.
+
+  **Both of those counts are checkable here**, which they were not until 2026-08-12: `verify/atlas_n4.csv`
+  now ships — 222 rows, one per NPN class, with `opt`, `tree`, `gap`, canalizing, the forced-multi verdict
+  and a `note` recording how each was decided. No solver needed:
+
+```sh
+cd theorem7/verify
+# F₄ = 6: the gap = 1 classes whose every optimum reconverges twice
+awk -F, 'NR>1 && $4==1 && $6==1' atlas_n4.csv | wc -l
+# 48 forced verdicts in total, and how many needed the ordering lemma
+awk -F, 'NR>1 && $6==1' atlas_n4.csv | wc -l
+awk -F, 'NR>1 && $6==1 && $7 ~ /\+sb/' atlas_n4.csv | wc -l
+```
+
+  The `note` column is what makes the ordering question auditable: a class decided on the certified path
+  reads `sat_tested`, one that needed the lemma reads `sat_tested+sb`. Two classes read
+  `sat_tested_nosb_76s` and `sat_tested_nosb_404s` — they exceeded the 60 s budget of the first campaign
+  and were re-run without the lemma, which is why the `n = 4` witnesses at `opt = 8` are on the certified
+  path. That also means the column records the **method of each certificate, not a uniform stopping
+  policy**: the campaign did not have one, so treat the per-`opt` shares as "what closed without the
+  lemma", not as a decision rate.
 
   **What this does not weaken:** the conjecture that the family is only its lift closure needs just
   **one** non-canalizing forced-multi gap-1 function to fall, and `0x03de0154` is one whose forcedness
   is pinned without any ordering argument. The headline — *the family exceeds its own closure* — sits
-  entirely on the no-SB path. The ordering-dependent pair raises the count from 13 to 15 and carries no
-  other weight. An earlier version of this file said "at least ten" without the split; the correction
-  is dated 2026-08-11 and came from an adversarial audit (Codex REV-0107).
+  entirely on the no-SB path. An earlier version of this file said "at least ten" without any split;
+  the correction is dated 2026-08-11 and came from an adversarial audit (Codex REV-0107). A second
+  correction, dated 2026-08-12, retires the split itself: all four non-lifts are now certified without
+  the ordering.
 
 One of the four non-lifts, **`0x09c50800`**, is the interesting one: every other witness came from a
 directed sweep on one family, while this one fell out of a random census. Existence-by-construction and
@@ -73,7 +106,25 @@ python3 verify/reproduce_witness.py           # quick (~seconds): opt lower boun
                                                      #   (verify_circuit self-certifying), non-canalizing
 python3 verify/reproduce_witness.py --full     # also the forced-multi no-SB certificate
                                                      #   (247 MB DRAT, ~minutes; ZERO symmetry breaking)
+python3 verify/reproduce_witness.py 0x03de0154 --tree-chain   # the tree lower bound, leg by leg
 ```
+
+The third command is the one to run if what you want to check is **`tree ≥ 9`** rather than `opt ≥ 8`. It
+re-encodes the fan-out-1 formula chain at `k = 1..8`, hashes each CNF, and compares every leg against the
+reference CSV for that witness — so a mismatch names the `k` that diverged instead of failing as a whole.
+All four ship: `tree_chain_n5.csv` for the flagship, plus `tree_chain_n5_0x09c50800.csv`,
+`tree_chain_n5_0xabfe03de.csv` and `tree_chain_n5_0x57df03de.csv`, and the command picks the one matching
+the truth table you pass. This leg is worth isolating because it is **independent of forced-multi**: the
+`tree = 9` of these witnesses does not route through the at-most-one-shared certificate, and a reader who
+distrusts that encoding can still check it.
+
+The other half of `tree = 9` is the **upper** bound, and it ships as `verify/tree_upper_n5.csv`: for each
+witness, the `k = 9` fan-out-1 formula SAT, its CNF hash, the re-simulation verdict against the truth
+table, and the recounted per-gate fan-out. Running `reproduce_witness.py <tt>` regenerates it. Both halves
+are pinned for all four witnesses in `manifest.csv` — *until 2026-08-12 the upper bound was pinned for
+only two of them, so the equality `tree = 9` was asserted for four witnesses on evidence that existed for
+two; the missing CNFs were sitting in a gitignored scratch directory. Found by an adversarial review, and
+the run that closed it took under three seconds per witness.*
 
 ### What ships as a proof, and what you must regenerate — updated 2026-08-11
 
@@ -100,8 +151,17 @@ rather than solved — that closes `opt = 8`.
 
 **What still needs one solver run, and it is one.** The forced-multi certificate: its DRAT runs to
 hundreds of megabytes (the sibling witness's is 379 MiB), so it cannot ship and its CNF hash is pinned
-instead (`ed3b8350f72f8078`). It regenerates in about 66 s with `kissat --unsat`. That same UNSAT is
-what gives `tree ≥ 9`, hence `tree = 9`. Stating the cost beats leaving a gap for the reader to find.
+instead (`ed3b8350f72f8078`). It regenerates in about 66 s with `kissat --unsat`. Stating the cost beats
+leaving a gap for the reader to find.
+
+**That UNSAT no longer carries `tree ≥ 9`, and the correction matters.** This file used to say the
+forced-multi UNSAT is "what gives `tree ≥ 9`, hence `tree = 9`" — true of the old route, and the old
+route made each witness's `tree` inherit whatever its forcedness leg rested on. Since 2026-08-11 the
+lower bound is its own **formula-mode UNSAT chain**, `k = 1..8`, eight legs each `drat-trim` VERIFIED,
+with **no reference to forced-multi at all** (`manifest.csv`, leg *tree lower bound … NO forced-multi
+dependency*). All four `n = 5` witnesses carry it. So `tree = 9` and forcedness are now two independent
+certificates rather than one implying the other, and a reader can reject either without touching the
+other.
 
 The second no-symmetry-breaking witness, `0x09c50800`, ships at `k ≤ 4` and regenerates the rest. Its
 value is **provenance** — it fell out of a random census rather than a directed sweep — and its chain
@@ -123,7 +183,7 @@ drat-trim verify/sample_certs/n5_0x03de0154_opt_k3.cnf \
 ## Count the classes (F₅ ≥ 15)
 
 ```sh
-python3 experiments/npn_check_f5.py [private tree]
+python3 verify/npn_check_f5.py
 ```
 
 Pure Python, no solver, seconds to run: canonicalizes every witness over the full n = 5 NPN group (all
@@ -149,14 +209,13 @@ and nothing that looks like a result, so the number above is either right or abs
 short. We adopted that discipline after four artefacts in one day turned out to be prefixes or stale
 copies wearing a finished file's name.
 
-The older `npn_check_f5.py` is superseded: it lifted only by AND and therefore reported 10.
+The counter this bundle ships supersedes an earlier one: it lifted only by AND and therefore reported 10.
 
 This script establishes **distinctness**, which is solver-free and therefore the cheapest part to
-trust. It does **not** establish that each of the ten is forced-multi; that comes per witness from the
-certificates, and two of the four non-lifts get theirs through the `gate_order_b` WLOG-ordering rather
-than the no-SB path — see *What is claimed* above, and `manifest.csv`, which pins CNF hashes only for
-the two no-SB witnesses. A reader who accepts only plain DRAT gets `F₅ ≥ 13`; the ordering lemma takes
-it to 15.
+trust. It does **not** establish that each of the fifteen is forced-multi; that comes per witness from
+the certificates, and as of 2026-08-12 **all four** non-lifts carry theirs on the no-SB path — see
+*What is claimed* above, and `manifest.csv`, which now pins a CNF hash for each of the four. A reader who
+accepts only plain DRAT gets `F₅ ≥ 15`.
 
 ## A class nobody aimed at
 
@@ -246,11 +305,21 @@ pointed them out:
   `grep "s VERIFIED"` works. In Python, `text=True` plus `splitlines()` handles it; on raw bytes you
   must split on `\r` as well as `\n`.
 
-The single step in the chain that is an argument rather than a certificate is the **lower** bound
-`tree ≥ opt + 1`. It runs: forced-multi means every size-optimal circuit has ≥ 2 reconvergent gates;
-a fan-out-1 formula has none; so no fan-out-1 formula of size `opt` exists; so `tree > opt`. This
-relies on a size-`opt` formula being a *model of the circuit-mode CNF*, which holds because such a
-formula is necessarily dedup-free and dead-gate-free — either defect would prune it below `opt`,
-contradicting the certified `opt`. Three independent reviewers (one per model family) checked this
-step against the actual clauses and each confirmed it; it is the place to aim at first if you want
-to break the result.
+**Superseded 2026-08-11, and left here because the argument is still worth knowing.** This section used
+to say that the one step in the chain which is an argument rather than a certificate is the **lower** bound
+`tree ≥ opt + 1`, reasoning: forced-multi means every size-optimal circuit has ≥ 2 reconvergent gates; a
+fan-out-1 formula has none; so no fan-out-1 formula of size `opt` exists; so `tree > opt`. That step relies
+on a size-`opt` formula being a *model of the circuit-mode CNF*, which holds because such a formula is
+necessarily dedup-free and dead-gate-free — either defect would prune it below `opt`, contradicting the
+certified `opt`. Three independent reviewers, one per model family, checked it against the actual clauses
+and each confirmed it.
+
+It is no longer the route the result takes. The lower bound is now a **formula-mode UNSAT chain**,
+`k = 1..opt`, one DRAT proof per leg, `drat-trim` VERIFIED on every one, with no reference to forced-multi —
+and the upper bound is the `k = opt + 1` formula witness pinned in `verify/tree_upper_n5.csv`, re-simulated
+against the truth table with per-gate fan-out recounted. Both halves ship for all four `n = 5` witnesses.
+So `tree` and forcedness are two independent certificates rather than one implying the other, and this
+paragraph's argument is a fallback, not the load-bearing step. *The contradiction of presenting both as
+current was found by Codex on 2026-08-12: the corrected version was written near the top of this file and
+this passage was left as it stood — the same failure-to-propagate the file's own numbers gate exists to
+catch.*

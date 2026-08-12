@@ -1,0 +1,5 @@
+tt_hex,n,k,sb,verdict,resimulated,max_fanout_nonoutput,cnf_sha16,t_sec,note
+0x03de0154,5,9,none,SAT,True,1,8fa10b4d591f800f,2.3,"fórmula fan-out-1 de 9 portas exibida, re-simulada nas 32 linhas, fan-out recontado = 1 em toda porta não-output ⟹ tree <= 9; auto-certificante, sem DRAT"
+0x09c50800,5,9,none,SAT,True,1,343cecdb5118640b,2.9,"fórmula fan-out-1 de 9 portas exibida, re-simulada nas 32 linhas, fan-out recontado = 1 em toda porta não-output ⟹ tree <= 9; auto-certificante, sem DRAT"
+0xabfe03de,5,9,none,SAT,True,1,d412b784a96d9403,2.2,"fórmula fan-out-1 de 9 portas exibida, re-simulada nas 32 linhas, fan-out recontado = 1 em toda porta não-output ⟹ tree <= 9; auto-certificante, sem DRAT"
+0x57df03de,5,9,none,SAT,True,1,1167a3e310506e27,2.7,"fórmula fan-out-1 de 9 portas exibida, re-simulada nas 32 linhas, fan-out recontado = 1 em toda porta não-output ⟹ tree <= 9; auto-certificante, sem DRAT"
