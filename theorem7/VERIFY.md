@@ -44,10 +44,31 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
   This claim is about **this bundle**, and the distinction is load-bearing rather than pedantic. The six
   `n = 4` classes cited above and all four `n = 5` witnesses carry no-symmetry-breaking certificates — the
   two `n = 4` witnesses at `opt = 8` needed a larger budget to get there (76 s and 404 s) and got it. The
-  full `n = 4` atlas, which this bundle does **not** ship, is a different story: 36 of its 48 forced
-  verdicts were decided *with* the ordering and are undecidable without it, all in the `gap ≥ 2` region.
-  So "nothing here rests on the lemma" is true of what travels and false of the whole census, and a
-  reader who finds the stronger sentence anywhere should treat it as the error it is.
+  full `n = 4` census is a different story: 36 of its 48 forced verdicts were decided *with* the ordering
+  and are undecidable without it, all in the `gap ≥ 2` region. So "nothing here rests on the lemma" is
+  true of what the headline needs and false of the whole census, and a reader who finds the stronger
+  sentence anywhere should treat it as the error it is.
+
+  **Both of those counts are checkable here**, which they were not until 2026-08-12: `verify/atlas_n4.csv`
+  now ships — 222 rows, one per NPN class, with `opt`, `tree`, `gap`, canalizing, the forced-multi verdict
+  and a `note` recording how each was decided. No solver needed:
+
+```sh
+cd theorem7/verify
+# F₄ = 6: the gap = 1 classes whose every optimum reconverges twice
+awk -F, 'NR>1 && $4==1 && $6==1' atlas_n4.csv | wc -l
+# 48 forced verdicts in total, and how many needed the ordering lemma
+awk -F, 'NR>1 && $6==1' atlas_n4.csv | wc -l
+awk -F, 'NR>1 && $6==1 && $7 ~ /\+sb/' atlas_n4.csv | wc -l
+```
+
+  The `note` column is what makes the ordering question auditable: a class decided on the certified path
+  reads `sat_tested`, one that needed the lemma reads `sat_tested+sb`. Two classes read
+  `sat_tested_nosb_76s` and `sat_tested_nosb_404s` — they exceeded the 60 s budget of the first campaign
+  and were re-run without the lemma, which is why the `n = 4` witnesses at `opt = 8` are on the certified
+  path. That also means the column records the **method of each certificate, not a uniform stopping
+  policy**: the campaign did not have one, so treat the per-`opt` shares as "what closed without the
+  lemma", not as a decision rate.
 
   **What this does not weaken:** the conjecture that the family is only its lift closure needs just
   **one** non-canalizing forced-multi gap-1 function to fall, and `0x03de0154` is one whose forcedness
