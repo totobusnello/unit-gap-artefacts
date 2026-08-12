@@ -31,19 +31,23 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
   the four non-lifts — `0x03de0154` and `0x09c50800` — have their forced-multi certificate produced
   **with no symmetry breaking at all** (vetted encoder, `gate_order_b = False`), and those are the two
   whose CNF hashes are pinned in `verify/manifest.csv`. The other two (`0xabfe03de`,
-  `0x57df03de`) were certified **through the `gate_order_b` WLOG-ordering**, so no no-SB CNF exists to
-  pin for them. Therefore:
-  - **`F₅ ≥ 13` needs no symmetry-breaking argument** — the eleven lift classes (by the Lift Theorem,
-    from the no-SB-certified n = 4 base) plus those two pinned non-lifts;
-  - **`F₅ ≥ 15`** additionally rests on the soundness of that ordering, which is a lemma proved by
-    three independent analyses — not a certificate.
+  `0x57df03de`) were certified **through the `gate_order_b` WLOG-ordering** until 2026-08-12, when the
+  at-most-one-shared query was re-run for both with the ordering switched off and both closed — UNSAT in
+  214 s and 180 s, `drat-trim` `s VERIFIED`, CNFs `39d9bd8db8daeb8b` and `378fa46181ed496b` now pinned.
+  Therefore:
+  - **all fifteen classes need no symmetry-breaking argument** — the eleven lift classes (by the Lift
+    Theorem, from the no-SB-certified n = 4 base) plus **all four** pinned non-lifts;
+  - **nothing in this bundle rests on the soundness of `gate_order_b`.** The earlier split between
+    `F₅ ≥ 13` certified and `F₅ ≥ 15` with the lemma is retired; it was a budget limit read as a limit of
+    the method, and the budget was the thing that changed.
 
   **What this does not weaken:** the conjecture that the family is only its lift closure needs just
   **one** non-canalizing forced-multi gap-1 function to fall, and `0x03de0154` is one whose forcedness
   is pinned without any ordering argument. The headline — *the family exceeds its own closure* — sits
-  entirely on the no-SB path. The ordering-dependent pair raises the count from 13 to 15 and carries no
-  other weight. An earlier version of this file said "at least ten" without the split; the correction
-  is dated 2026-08-11 and came from an adversarial audit (Codex REV-0107).
+  entirely on the no-SB path. An earlier version of this file said "at least ten" without any split;
+  the correction is dated 2026-08-11 and came from an adversarial audit (Codex REV-0107). A second
+  correction, dated 2026-08-12, retires the split itself: all four non-lifts are now certified without
+  the ordering.
 
 One of the four non-lifts, **`0x09c50800`**, is the interesting one: every other witness came from a
 directed sweep on one family, while this one fell out of a random census. Existence-by-construction and
@@ -152,11 +156,10 @@ copies wearing a finished file's name.
 The older `npn_check_f5.py` is superseded: it lifted only by AND and therefore reported 10.
 
 This script establishes **distinctness**, which is solver-free and therefore the cheapest part to
-trust. It does **not** establish that each of the ten is forced-multi; that comes per witness from the
-certificates, and two of the four non-lifts get theirs through the `gate_order_b` WLOG-ordering rather
-than the no-SB path — see *What is claimed* above, and `manifest.csv`, which pins CNF hashes only for
-the two no-SB witnesses. A reader who accepts only plain DRAT gets `F₅ ≥ 13`; the ordering lemma takes
-it to 15.
+trust. It does **not** establish that each of the fifteen is forced-multi; that comes per witness from
+the certificates, and as of 2026-08-12 **all four** non-lifts carry theirs on the no-SB path — see
+*What is claimed* above, and `manifest.csv`, which now pins a CNF hash for each of the four. A reader who
+accepts only plain DRAT gets `F₅ ≥ 15`.
 
 ## A class nobody aimed at
 

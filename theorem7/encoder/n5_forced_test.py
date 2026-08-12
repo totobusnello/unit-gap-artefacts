@@ -23,7 +23,7 @@ from zc_certify import write_cnf, kissat, drat_verify, sha16, CERTS  # noqa: E40
 N = 5
 
 
-def build_amo_shared(tt, opt, gate_order_sb=False, gate_order_b=False, n=None):
+def build_amo_shared(tt, opt, gate_order_sb=False, gate_order_b=False, n=None, relax=()):
     """Base circuit encoder (k=opt) + at-most-one-shared. Sound direction: fan-out>=2 => z.
 
     `n=None` cai no global do MÓDULO, que é 5. Isso era uma armadilha silenciosa entre módulos, achada
@@ -47,7 +47,10 @@ def build_amo_shared(tt, opt, gate_order_sb=False, gate_order_b=False, n=None):
     larger operand b) is a possible repair, but needs independent-family panel vetting BEFORE
     any reliance. Empirical validation on known instances is necessary but NOT sufficient."""
     nn = N if n is None else n
-    enc = AIGEncoder(nn, opt, tt).build()
+    # `relax` repassa ao encoder o desligamento de WLOGs, para AUDITAR o §4.2 (ver AIGEncoder.__init__).
+    # Se o UNSAT sobrevive com 'dup'/'aeqb'/'const' relaxados, esses três constraints não sustentavam o
+    # resultado e deixam de precisar de argumento — o elo em prosa encolhe de cinco itens para dois.
+    enc = AIGEncoder(nn, opt, tt, relax=relax).build()
     nvars = enc.nvars
     clauses = list(enc.clauses)
     k = opt

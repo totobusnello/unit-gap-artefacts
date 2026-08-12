@@ -30,13 +30,14 @@ to `z`. The counter asserts that explanation class by class. An earlier version 
 least ten": the count was low because the counting script generated only the AND-lifts, which Kirill
 Krinkin spotted on 2026-08-11 while checking these artefacts without running a solver.
 
-**The count splits by trust path, and `VERIFY.md` states the split instead of averaging it.** Two of
-the four non-lifts carry a forced-multi certificate produced with **no symmetry breaking at all**, and
-those are the two whose CNF hashes are pinned in the manifest; the other two were certified through a
-proved WLOG gate-ordering, for which no no-symmetry-breaking CNF exists to pin. So **`F₅ ≥ 13` needs no
-symmetry-breaking argument** and `F₅ ≥ 15` additionally rests on that ordering lemma. The headline is
-unaffected either way: refuting "the family is only its lift closure" needs one non-canalizing witness,
-and one of the two no-symmetry-breaking witnesses is exactly that.
+**All four non-lifts carry a forced-multi certificate produced with no symmetry breaking at all**, and
+all four CNF hashes are pinned in the manifest. Two of them were, until 2026-08-12, certified only through
+a proved WLOG gate-ordering; re-running their at-most-one-shared query with the ordering switched off
+closed both — UNSAT in 214 s and 180 s, `drat-trim` `s VERIFIED`. So **`F₅ ≥ 15` needs no
+symmetry-breaking argument**, and the earlier split between `F₅ ≥ 13` certified and `F₅ ≥ 15` with the
+lemma is retired. Nothing in this bundle rests on that ordering. The headline never depended on it
+anyway: refuting "the family is only its lift closure" needs one non-canalizing witness, and there are
+four.
 
 **On rarity, the honest version:** the random census found one witness in 14,466 sampled truth tables,
 and that is a **yield, not a density** — the sampler is deliberately biased toward sparse, low-cost

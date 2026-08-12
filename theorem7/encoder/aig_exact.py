@@ -18,9 +18,61 @@ Semântica do encoding (validada no G3 contra enumeração independente):
 
 REGRA REV-0004: prova DRAT certifica a CNF, não o encoding — por isso o G3
 (enumeração cruzada) e a verificação por simulação de todo circuito SAT.
+
+═══════════════════════════════════════════════════════════════════════════════
+`relax=` — ESTE ENCODER RODA FORA DO PRÓPRIO ESPAÇO CANÔNICO, E ISSO SERVE A
+QUALQUER CLAIM QUE DEPENDA DE UM WLOG DELE
+═══════════════════════════════════════════════════════════════════════════════
+
+Todo claim de síntese exata deste programa atravessa os constraints estruturais
+listados acima, e até 2026-08-11 a defesa deles era PROSA: o paper enumerava os
+constraints, argumentava que cada um é sem perda de generalidade em `k = opt`, e
+pedia ao leitor que aceitasse a análise. Era o elo mais fraco do P1 e está
+nomeado como tal no §4.2.
+
+Parte disso não precisa de argumento. Os constraints se dividem em dois tipos,
+e a diferença é OPERACIONAL, não estilística:
+
+  RELAXÁVEIS — proíbem objetos que existem no problema mas são redundantes.
+    'dup'    duas portas com a MESMA (a, pa, b, pb)
+    'aeqb'   a == b, admitindo `x ∧ x` (buffer) e `x ∧ ¬x` (constante 0)
+    'const'  a constante livre do §2.1 como operando (nunca era oferecida)
+  DESLIGUE E RODE DE NOVO. Se o veredicto SOBREVIVE, o constraint não sustentava
+  o resultado: ele sai do argumento e o leitor não precisa aceitar nada sobre
+  ele. Se MUDA, era load-bearing — e agora se sabe com número, não por suposição.
+
+  DEFINICIONAIS — codificam o que a pergunta significa.
+    toda porta i<k alimenta uma posterior  ·  a saída é a porta k
+  NÃO relaxe. Porta morta significa circuito estritamente MENOR, o que contradiz
+  `opt = k`; relaxar troca a pergunta por "existe circuito de ≤ k portas com
+  pouca reconvergência", cuja resposta é trivialmente sim e nada diz sobre
+  ótimos. Aqui o argumento é irredutível — mas fica pequeno e quase
+  tautológico, do tipo que só se recusa recusando a definição de ótimo.
+
+VALIDE O INSTRUMENTO ANTES DE USÁ-LO, por uma propriedade que TEM de valer:
+relaxar só admite circuitos que NÃO SÃO MELHORES, logo o `opt` medido não pode
+mudar — UNSAT em `k = opt−1`, SAT em `k = opt`. Se mudar, o relaxamento está
+errado e nada medido depois vale. Sem esse passo, um relaxamento com bug produz
+UNSAT fácil e PARECE confirmar o resultado.
+
+O QUE `relax` NÃO ALCANÇA: que a truth table, a semântica do Tseitin e a noção
+de fan-out no CNF correspondam ao objeto matemático. Relaxamento audita QUAIS
+OBJETOS o encoder admite; não audita O QUE ELE SIGNIFICA. Fechar isso é
+formalização (Lean), não mais solving. Um claim que diga "os WLOGs foram
+testados" e sugira que a ponte semântica está certificada é overclaim.
+
+Procedimento completo, com o status de lastro: `13_WRITEUP_STANDARD.md`,
+seção *Auditoria da ponte semântica por RELAXAMENTO*. Instância que originou
+isto: claim 0043 e P1 §4.2.1 — cinco constraints, três testados, dois
+definicionais. Molde de script: `exp_krinkin_cor6/audit_wlog_42.py` (copie com
+nome próprio por claim; script que serve a duas claims é onde os escopos se
+confundem).
+
+`relax` é para AUDITAR argumento, NUNCA para produzir claim: o caminho de
+confiança de qualquer resultado é o encoder no default (`relax=()`).
 """
 
-from itertools import combinations
+from itertools import combinations, combinations_with_replacement, product
 
 
 def tt_bit(tt, t):
@@ -28,12 +80,35 @@ def tt_bit(tt, t):
 
 
 class AIGEncoder:
-    def __init__(self, n, k, tt, formula=False):
+    # Nó-fonte CONSTANTE, usado só sob relax='const'. Vale 1; a polaridade do operando dá o 0. Índice 0
+    # está livre porque entradas são 1..n e portas são n+i.
+    CONST_NODE = 0
+
+    def __init__(self, n, k, tt, formula=False, relax=()):
+        """`relax` desliga WLOGs para AUDITAR o argumento do §4.2, nunca para produzir claim.
+
+        O §4.2 sustenta que os constraints estruturais do encoder são WLOG em k=opt e que nenhum muda
+        fan-out — e essa é a única passagem do paper onde prosa substitui certificado. Três deles podem
+        ser TESTADOS em vez de argumentados: se o UNSAT do amo-shared sobrevive com o constraint
+        RELAXADO, ele não estava sustentando o resultado e sai do argumento.
+
+          'dup'   permite duas portas com a MESMA (a,pa,b,pb)
+          'aeqb'  permite a == b  (AND(x,x)=x buffer; AND(x,~x)=0 constante)
+          'const' admite 0 e 1 como operandos (o §2.1 admite constante livre; o encoder não)
+          'order' admite (a,b) E (b,a) — relaxa a ORDENAÇÃO `a < b`, que é simetria por comutatividade
+                  do AND. ATENÇÃO: `aeqb` sozinho NÃO relaxa a ordenação (Kimi REV-0113) —
+                  `combinations_with_replacement` devolve pares ordenados, só admitindo a==b
+
+        Os outros dois — toda porta alimenta uma posterior, e a saída é a porta k — NÃO são relaxáveis:
+        porta morta significa circuito menor, logo eles não são simetria, são a DEFINIÇÃO de "ótimo com
+        k portas". Relaxá-los tornaria a pergunta outra.
+        """
         """n entradas, k portas AND, tt = truth table como inteiro de 2^n bits.
         formula=True: modo FÓRMULA (fan-out 1) — cada porta não-saída é usada por
         EXATAMENTE uma posterior (árvore). SAT em k => tree(f) <= k. Idêntico ao
         modo formula do XAGEncoder; a restrição adicional é só a de fan-out."""
         self.n, self.k, self.tt, self.formula = n, k, tt, formula
+        self.relax = set(relax)
         self.rows = 1 << n
         self.nvars = 0
         self.clauses = []
@@ -44,7 +119,19 @@ class AIGEncoder:
         for i in range(1, k + 1):
             opts = []
             nodes = list(range(1, self.n + i))  # nós disponíveis (< n+i)
-            for a, b in combinations(nodes, 2):
+            if "const" in self.relax:
+                nodes = [self.CONST_NODE] + nodes   # 0/1 via polaridade sobre uma fonte constante
+            # 'order' relaxa a ORDENAÇÃO de operandos (`a < b`), que é simetria por comutatividade do
+            # AND. Kimi REV-0113 pegou que `combinations_with_replacement` ainda devolve pares
+            # ORDENADOS: ela relaxa `a != b`, não `a < b`. Sem `order`, a ordenação seguia em vigor e a
+            # contagem "três dos cinco relaxados" era falsa — dois dos cinco, mais o sexto silencioso.
+            if "order" in self.relax:
+                pairs = product(nodes, repeat=2)          # (a,b) E (b,a); inclui a==b
+            elif "aeqb" in self.relax:
+                pairs = combinations_with_replacement(nodes, 2)   # a <= b
+            else:
+                pairs = combinations(nodes, 2)                    # a < b
+            for a, b in pairs:
                 for pa in (0, 1):
                     for pb in (0, 1):
                         opts.append((a, pa, b, pb, self._new()))
@@ -57,6 +144,8 @@ class AIGEncoder:
 
     def _node_val(self, node, t):
         """Valor do nó na linha t: (const, None) p/ entradas; (None, var) p/ portas."""
+        if node == self.CONST_NODE:
+            return (1, None)          # fonte constante 1; ~1 = 0 pela polaridade
         if node <= self.n:
             return ((t >> (node - 1)) & 1, None)
         return (None, self.v[(node - self.n, t)])
@@ -95,7 +184,7 @@ class AIGEncoder:
         # subárvore pode aparecer DUPLICADA (é a razão de tree>opt); proibir
         # duplicatas excluiria fórmulas mínimas válidas e daria UNSAT FALSO
         # (lower bound de tree errado). Por isso o dedup é desligado se formula.
-        if not self.formula:
+        if not self.formula and "dup" not in self.relax:
             by_tuple = {}
             for i in range(1, self.k + 1):
                 for a, pa, b, pb, s in self.options[i]:
