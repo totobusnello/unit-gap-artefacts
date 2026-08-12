@@ -41,6 +41,14 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
     `F₅ ≥ 13` certified and `F₅ ≥ 15` with the lemma is retired; it was a budget limit read as a limit of
     the method, and the budget was the thing that changed.
 
+  This claim is about **this bundle**, and the distinction is load-bearing rather than pedantic. The six
+  `n = 4` classes cited above and all four `n = 5` witnesses carry no-symmetry-breaking certificates — the
+  two `n = 4` witnesses at `opt = 8` needed a larger budget to get there (76 s and 404 s) and got it. The
+  full `n = 4` atlas, which this bundle does **not** ship, is a different story: 36 of its 48 forced
+  verdicts were decided *with* the ordering and are undecidable without it, all in the `gap ≥ 2` region.
+  So "nothing here rests on the lemma" is true of what travels and false of the whole census, and a
+  reader who finds the stronger sentence anywhere should treat it as the error it is.
+
   **What this does not weaken:** the conjecture that the family is only its lift closure needs just
   **one** non-canalizing forced-multi gap-1 function to fall, and `0x03de0154` is one whose forcedness
   is pinned without any ordering argument. The headline — *the family exceeds its own closure* — sits
@@ -81,11 +89,21 @@ python3 verify/reproduce_witness.py 0x03de0154 --tree-chain   # the tree lower b
 ```
 
 The third command is the one to run if what you want to check is **`tree ≥ 9`** rather than `opt ≥ 8`. It
-re-encodes the fan-out-1 formula chain at `k = 1..8`, hashes each CNF, and compares every leg against
-`tree_chain_n5.csv`, which ships beside it — so a mismatch names the `k` that diverged instead of failing
-as a whole. This leg is worth isolating because it is **independent of forced-multi**: the `tree = 9` of
-the flagship does not route through the at-most-one-shared certificate, and a reader who distrusts that
-encoding can still check this. The manifest row for the `tree` lower bound cites exactly this command.
+re-encodes the fan-out-1 formula chain at `k = 1..8`, hashes each CNF, and compares every leg against the
+reference CSV for that witness — so a mismatch names the `k` that diverged instead of failing as a whole.
+All four ship: `tree_chain_n5.csv` for the flagship, plus `tree_chain_n5_0x09c50800.csv`,
+`tree_chain_n5_0xabfe03de.csv` and `tree_chain_n5_0x57df03de.csv`, and the command picks the one matching
+the truth table you pass. This leg is worth isolating because it is **independent of forced-multi**: the
+`tree = 9` of these witnesses does not route through the at-most-one-shared certificate, and a reader who
+distrusts that encoding can still check it.
+
+The other half of `tree = 9` is the **upper** bound, and it ships as `verify/tree_upper_n5.csv`: for each
+witness, the `k = 9` fan-out-1 formula SAT, its CNF hash, the re-simulation verdict against the truth
+table, and the recounted per-gate fan-out. Running `reproduce_witness.py <tt>` regenerates it. Both halves
+are pinned for all four witnesses in `manifest.csv` — *until 2026-08-12 the upper bound was pinned for
+only two of them, so the equality `tree = 9` was asserted for four witnesses on evidence that existed for
+two; the missing CNFs were sitting in a gitignored scratch directory. Found by an adversarial review, and
+the run that closed it took under three seconds per witness.*
 
 ### What ships as a proof, and what you must regenerate — updated 2026-08-11
 
@@ -266,11 +284,21 @@ pointed them out:
   `grep "s VERIFIED"` works. In Python, `text=True` plus `splitlines()` handles it; on raw bytes you
   must split on `\r` as well as `\n`.
 
-The single step in the chain that is an argument rather than a certificate is the **lower** bound
-`tree ≥ opt + 1`. It runs: forced-multi means every size-optimal circuit has ≥ 2 reconvergent gates;
-a fan-out-1 formula has none; so no fan-out-1 formula of size `opt` exists; so `tree > opt`. This
-relies on a size-`opt` formula being a *model of the circuit-mode CNF*, which holds because such a
-formula is necessarily dedup-free and dead-gate-free — either defect would prune it below `opt`,
-contradicting the certified `opt`. Three independent reviewers (one per model family) checked this
-step against the actual clauses and each confirmed it; it is the place to aim at first if you want
-to break the result.
+**Superseded 2026-08-11, and left here because the argument is still worth knowing.** This section used
+to say that the one step in the chain which is an argument rather than a certificate is the **lower** bound
+`tree ≥ opt + 1`, reasoning: forced-multi means every size-optimal circuit has ≥ 2 reconvergent gates; a
+fan-out-1 formula has none; so no fan-out-1 formula of size `opt` exists; so `tree > opt`. That step relies
+on a size-`opt` formula being a *model of the circuit-mode CNF*, which holds because such a formula is
+necessarily dedup-free and dead-gate-free — either defect would prune it below `opt`, contradicting the
+certified `opt`. Three independent reviewers, one per model family, checked it against the actual clauses
+and each confirmed it.
+
+It is no longer the route the result takes. The lower bound is now a **formula-mode UNSAT chain**,
+`k = 1..opt`, one DRAT proof per leg, `drat-trim` VERIFIED on every one, with no reference to forced-multi —
+and the upper bound is the `k = opt + 1` formula witness pinned in `verify/tree_upper_n5.csv`, re-simulated
+against the truth table with per-gate fan-out recounted. Both halves ship for all four `n = 5` witnesses.
+So `tree` and forcedness are two independent certificates rather than one implying the other, and this
+paragraph's argument is a fallback, not the load-bearing step. *The contradiction of presenting both as
+current was found by Codex on 2026-08-12: the corrected version was written near the top of this file and
+this passage was left as it stood — the same failure-to-propagate the file's own numbers gate exists to
+catch.*

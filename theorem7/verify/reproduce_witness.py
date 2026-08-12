@@ -189,17 +189,30 @@ def leg_tree_chain():
     # do layout privado neste arquivo, e ele pegou a primeira versão desta função. Então o caminho de
     # fora vem por variável de ambiente, e a ausência dele é um caso tratado, não um erro.
     ref = {}
-    cands = [os.path.join(HERE, "tree_chain_n5.csv")]
+    # POR TESTEMUNHA. A v1 procurava só `tree_chain_n5.csv`, que é o CSV do FLAGSHIP — para as outras três
+    # o filtro por `tt_hex` não casava nada, `ref` ficava vazio e a comparação por perna passava sem
+    # comparar. Achado pelo Codex em 2026-08-12, junto com a lacuna do upper bound. Nome específico
+    # primeiro, legado depois, porque o flagship é o único que usa o nome sem sufixo.
+    cands = [os.path.join(HERE, f"tree_chain_n5_{TT:#010x}.csv"),
+             os.path.join(HERE, "tree_chain_n5.csv")]
     if os.environ.get("TREE_CHAIN_CSV"):
         cands.append(os.environ["TREE_CHAIN_CSV"])
+    ref_from = None
     for cand in cands:
-        if os.path.exists(cand):
-            for r in _csv.DictReader(open(cand)):
-                if r.get("mode") == "formula" and r.get("tt_hex", "").lower() == f"{TT:#010x}":
-                    ref[int(r["k"])] = r["cnf_sha16"]
+        if not os.path.exists(cand):
+            continue
+        for r in _csv.DictReader(open(cand)):
+            if r.get("mode") == "formula" and r.get("tt_hex", "").lower() == f"{TT:#010x}":
+                ref[int(r["k"])] = r["cnf_sha16"]
+        # `break` só quando o arquivo REALMENTE trouxe pernas desta testemunha. A v1 saía no primeiro que
+        # EXISTIA, então o CSV do flagship absorvia a busca das outras três: `ref` vazio, e a mensagem
+        # anunciando comparação que não houve. Silêncio com cara de conferência é o pior desfecho.
+        if ref:
+            ref_from = os.path.basename(cand)
             break
+        ref = {}
     print(f"\n[tree chain] formula-mode UNSAT k=1..{OPT}  "
-          f"({'comparando contra tree_chain_n5.csv' if ref else 'sem CSV de referencia no bundle: SHAs impressos para conferencia'})")
+          f"({'comparando contra ' + ref_from if ref_from else 'sem CSV de referencia para esta testemunha no bundle: SHAs impressos para conferencia'})")
     allok = True
     for k in range(1, OPT + 1):
         enc = AIGEncoder(N, k, TT, formula=True).build()
