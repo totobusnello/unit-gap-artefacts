@@ -48,17 +48,25 @@ from zc_certify import write_cnf, kissat, drat_verify, sha16 # noqa: E402
 # fork is what strangers execute. The fix is one table that serves every documented command, so the
 # public bundle can be GENERATED from this tree rather than maintained beside it (tools/export_public.sh).
 #
-# `forced_cnf_sha16: None` is honest, not lazy: the two other sweep winners were certified through the
-# `gate_order_b` WLOG-ordering rather than the no-SB path, so no no-SB CNF hash exists to pin. Those
-# runs still check the verdict; they just cannot check byte-identity against a pin that was never
-# produced. Stating that beats inventing a hash or silently skipping the leg.
+# Every witness here now carries a no-SB `forced_cnf_sha16`. Until 2026-08-12 two of them did not, and
+# this comment explained why: they had been certified through the `gate_order_b` WLOG-ordering, so no
+# no-SB CNF existed to pin. That was honest then and became a lie the moment the certificates landed —
+# the manifest pinned the two new hashes and named THIS script as their regenerator while the table
+# below still said the hashes did not exist and the code below forced `match = True` without comparing.
+# Three independent reviewers found it in the same hour (Codex REV-0114, DeepSeek REV-0115, Kimi
+# REV-0116), which is what a broken promise in the one file strangers execute deserves.
+#
+# So: `forced_cnf_sha16: None` is no longer a state any n=5 witness is allowed to be in. If a witness
+# ever legitimately lacks a pin, the `None` branch below still handles it and says so out loud — but
+# check the manifest first, because a manifest row that names this script and a `None` here cannot both
+# be right.
 WITNESSES = {
     0x03DE0154: {"n": 5, "opt": 8, "forced_cnf_sha16": "ed3b8350f72f8078",
                  "desc": "0x03de & (~x0 | x4) — 7th class, found by directed sweep"},
-    0xABFE03DE: {"n": 5, "opt": 8, "forced_cnf_sha16": None,
-                 "desc": "0x03de | (x0 & x4) — 8th class, directed sweep (forced-multi certified via gate_order_b)"},
-    0x57DF03DE: {"n": 5, "opt": 8, "forced_cnf_sha16": None,
-                 "desc": "0x03de | (~x0 & x4) — 9th class, directed sweep (forced-multi certified via gate_order_b)"},
+    0xABFE03DE: {"n": 5, "opt": 8, "forced_cnf_sha16": "39d9bd8db8daeb8b",
+                 "desc": "0x03de | (x0 & x4) — 8th class, directed sweep (forced-multi certified with NO symmetry breaking, 2026-08-12)"},
+    0x57DF03DE: {"n": 5, "opt": 8, "forced_cnf_sha16": "378fa46181ed496b",
+                 "desc": "0x03de | (~x0 & x4) — 9th class, directed sweep (forced-multi certified with NO symmetry breaking, 2026-08-12)"},
     0x03DE:     {"n": 4, "opt": 6, "forced_cnf_sha16": None,
                  "desc": "the n=4 base of the Lift Theorem — flagship class 0x03de"},
     0x09C50800: {"n": 5, "opt": 8, "forced_cnf_sha16": "8949334bf9baa8ca",
@@ -164,6 +172,58 @@ def leg_tree():
     return ok and fanout_ok
 
 
+def leg_tree_chain():
+    """A cadeia de LOWER BOUND do tree: formula UNSAT em k=1..opt, uma perna por k, com DRAT.
+
+    Esta perna existe porque o `manifest.csv` pina `b922fe75b9c3508e` para ela e nomeava, até
+    2026-08-12, um script PRIVADO como regenerador — promessa que um leitor externo não podia cumprir.
+    Depois eu a troquei por uma DESCRIÇÃO (`aig_exact.py (AIGEncoder(...) for k=1..8)`), que também não
+    se cola num shell. DeepSeek REV-0115 pegou as duas formas. Um comando que existe é a única correção.
+
+    Compara o SHA de cada k contra `tree_chain_n5.csv` quando esse artefato viaja no bundle; quando não
+    viaja, ainda imprime os SHAs para conferência manual, e diz qual é o caso — em vez de calar.
+    """
+    import csv as _csv
+    # O CSV de referência é procurado ao LADO do script e no diretório de experimentos que o layout
+    # privado usa. O nome do diretório privado NÃO é escrito aqui: o export tem um gate que proíbe path
+    # do layout privado neste arquivo, e ele pegou a primeira versão desta função. Então o caminho de
+    # fora vem por variável de ambiente, e a ausência dele é um caso tratado, não um erro.
+    ref = {}
+    cands = [os.path.join(HERE, "tree_chain_n5.csv")]
+    if os.environ.get("TREE_CHAIN_CSV"):
+        cands.append(os.environ["TREE_CHAIN_CSV"])
+    for cand in cands:
+        if os.path.exists(cand):
+            for r in _csv.DictReader(open(cand)):
+                if r.get("mode") == "formula" and r.get("tt_hex", "").lower() == f"{TT:#010x}":
+                    ref[int(r["k"])] = r["cnf_sha16"]
+            break
+    print(f"\n[tree chain] formula-mode UNSAT k=1..{OPT}  "
+          f"({'comparando contra tree_chain_n5.csv' if ref else 'sem CSV de referencia no bundle: SHAs impressos para conferencia'})")
+    allok = True
+    for k in range(1, OPT + 1):
+        enc = AIGEncoder(N, k, TT, formula=True).build()
+        if any(len(cl) == 0 for cl in enc.clauses):
+            print(f"  k={k}: UNSAT (syntactic)")
+            continue
+        cnf = os.path.join(OUT, f"n{N}_{TT:#010x}_tree_k{k}.cnf")
+        write_cnf(enc.nvars, enc.clauses, cnf)
+        got = sha16(cnf)
+        drat = os.path.join(OUT, f"n{N}_{TT:#010x}_tree_k{k}.drat")
+        rc, _ = kissat(cnf, drat)
+        assert rc == 20, f"formula k={k} expected UNSAT(20), got {rc}"
+        dok = drat_verify(cnf, drat)
+        if k in ref:
+            m = (got == ref[k])
+            allok = allok and dok and m
+            print(f"  k={k}: UNSAT  cnf={got} ({'MATCH' if m else 'MISMATCH vs ' + ref[k]})  "
+                  f"drat-trim={'VERIFIED' if dok else 'FAIL'}")
+        else:
+            allok = allok and dok
+            print(f"  k={k}: UNSAT  cnf={got}  drat-trim={'VERIFIED' if dok else 'FAIL'}")
+    return allok
+
+
 def leg_canalizing():
     c = is_canalizing(TT)
     print(f"\n[non-canalizing] canalizing={c}  => {'NOT a lift (independent class)' if not c else 'IS a lift'}")
@@ -199,6 +259,8 @@ def main():
     ap.add_argument("tt", nargs="?", default=f"{DEFAULT_TT:#010x}",
                     help="truth table in hex (default: the 7th-class witness 0x03de0154)")
     ap.add_argument("--full", action="store_true", help="also regenerate the forced-multi no-SB certificate")
+    ap.add_argument("--tree-chain", action="store_true",
+                    help="also regenerate the tree lower-bound chain (formula UNSAT k=1..opt, per-leg SHAs)")
     args = ap.parse_args()
     tt = int(args.tt, 16)
     if tt not in WITNESSES:
@@ -213,6 +275,8 @@ def main():
         f"tree<= {OPT+1} (formula witness)": leg_tree(),
         "non-canalizing": leg_canalizing(),
     }
+    if args.tree_chain:
+        res[f"tree chain (formula UNSAT k=1..{OPT})"] = leg_tree_chain()
     if args.full:
         res["forced-multi (no-SB UNSAT)"] = leg_forced()
     print("\n=== SUMMARY ===")

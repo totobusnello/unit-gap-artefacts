@@ -77,7 +77,15 @@ python3 verify/reproduce_witness.py           # quick (~seconds): opt lower boun
                                                      #   (verify_circuit self-certifying), non-canalizing
 python3 verify/reproduce_witness.py --full     # also the forced-multi no-SB certificate
                                                      #   (247 MB DRAT, ~minutes; ZERO symmetry breaking)
+python3 verify/reproduce_witness.py 0x03de0154 --tree-chain   # the tree lower bound, leg by leg
 ```
+
+The third command is the one to run if what you want to check is **`tree ≥ 9`** rather than `opt ≥ 8`. It
+re-encodes the fan-out-1 formula chain at `k = 1..8`, hashes each CNF, and compares every leg against
+`tree_chain_n5.csv`, which ships beside it — so a mismatch names the `k` that diverged instead of failing
+as a whole. This leg is worth isolating because it is **independent of forced-multi**: the `tree = 9` of
+the flagship does not route through the at-most-one-shared certificate, and a reader who distrusts that
+encoding can still check this. The manifest row for the `tree` lower bound cites exactly this command.
 
 ### What ships as a proof, and what you must regenerate — updated 2026-08-11
 
@@ -104,8 +112,17 @@ rather than solved — that closes `opt = 8`.
 
 **What still needs one solver run, and it is one.** The forced-multi certificate: its DRAT runs to
 hundreds of megabytes (the sibling witness's is 379 MiB), so it cannot ship and its CNF hash is pinned
-instead (`ed3b8350f72f8078`). It regenerates in about 66 s with `kissat --unsat`. That same UNSAT is
-what gives `tree ≥ 9`, hence `tree = 9`. Stating the cost beats leaving a gap for the reader to find.
+instead (`ed3b8350f72f8078`). It regenerates in about 66 s with `kissat --unsat`. Stating the cost beats
+leaving a gap for the reader to find.
+
+**That UNSAT no longer carries `tree ≥ 9`, and the correction matters.** This file used to say the
+forced-multi UNSAT is "what gives `tree ≥ 9`, hence `tree = 9`" — true of the old route, and the old
+route made each witness's `tree` inherit whatever its forcedness leg rested on. Since 2026-08-11 the
+lower bound is its own **formula-mode UNSAT chain**, `k = 1..8`, eight legs each `drat-trim` VERIFIED,
+with **no reference to forced-multi at all** (`manifest.csv`, leg *tree lower bound … NO forced-multi
+dependency*). All four `n = 5` witnesses carry it. So `tree = 9` and forcedness are now two independent
+certificates rather than one implying the other, and a reader can reject either without touching the
+other.
 
 The second no-symmetry-breaking witness, `0x09c50800`, ships at `k ≤ 4` and regenerates the rest. Its
 value is **provenance** — it fell out of a random census rather than a directed sweep — and its chain
@@ -127,7 +144,7 @@ drat-trim verify/sample_certs/n5_0x03de0154_opt_k3.cnf \
 ## Count the classes (F₅ ≥ 15)
 
 ```sh
-python3 experiments/npn_check_f5.py [private tree]
+python3 verify/npn_check_f5.py
 ```
 
 Pure Python, no solver, seconds to run: canonicalizes every witness over the full n = 5 NPN group (all
@@ -153,7 +170,7 @@ and nothing that looks like a result, so the number above is either right or abs
 short. We adopted that discipline after four artefacts in one day turned out to be prefixes or stale
 copies wearing a finished file's name.
 
-The older `npn_check_f5.py` is superseded: it lifted only by AND and therefore reported 10.
+The counter this bundle ships supersedes an earlier one: it lifted only by AND and therefore reported 10.
 
 This script establishes **distinctness**, which is solver-free and therefore the cheapest part to
 trust. It does **not** establish that each of the fifteen is forced-multi; that comes per witness from
