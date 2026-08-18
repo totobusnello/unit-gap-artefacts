@@ -1,5 +1,11 @@
 # From refutation to theorem: the structure of gap=1 sharing in optimal AIGs
 
+<!-- snapshot-stamp -->
+> **Snapshot de 2026-08-08.** Esta é uma nota de trabalho: os números aqui são o estado do
+> artefato NAQUELE dia e **não** são reconferidos por gate. O valor corrente de qualquer
+> contagem vive no CSV que a produziu (`experiments/ [private tree]`), lido por
+> `bash tools/numbers.sh`; o estágio do projeto vive em [`STATUS.md`](../../STATUS.md). Divergência entre esta nota e o artefato resolve-se **a favor do artefato**.
+
 *A unified note on Theorem 7 of “The Unit Gap” (arXiv:2603.08033), tying together four results
 (claims 0033–0036). Written for collaboration — every quantitative claim traces to a
 DRAT-certificate or an exhaustive enumeration named in the “Artifacts” section.*

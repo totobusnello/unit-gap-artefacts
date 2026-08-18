@@ -52,6 +52,13 @@ NONLIFTS = {
     "0xabfe03de": 0xABFE03DE,   # directed sweep, gate_order_b
     "0x57df03de": 0x57DF03DE,   # directed sweep, gate_order_b
     "0x09c50800": 0x09C50800,   # random census, no-SB certificate
+    # Acrescentadas 2026-08-14 pelo lote k=9 (`law_forced_multi_k9_vps.csv`). Vieram da construção
+    # `beside`, NÃO do lift — logo estão fora do fecho das seis sementes de n=4, e é por isso que
+    # entram aqui e não em F4. Ambas com amo-shared UNSAT em k=opt=9, DRAT `s VERIFIED`, sem
+    # symmetry breaking. Note que as DUAS saem da mesma semente `0x07bc` por operadores diferentes:
+    # é o dado que sustenta a hipótese de que a forçosidade sob `beside` é propriedade da semente.
+    "0x07bc0514": 0x07BC0514,   # beside `z and (~x0 or x4)`, no-SB certificate, 3869s
+    "0x57fd07bc": 0x57FD07BC,   # beside `z or (~x0 and x4)`, no-SB certificate, 3159s
 }
 
 

@@ -18,9 +18,9 @@ whose *every* size-optimal circuit is forced to reconverge (the **forced-reconve
 
 At n = 4 the family has exactly six NPN classes, exhaustively. The Lift Theorem (a paper proof,
 corroborated by certificates at n = 4, 5 and 6) makes it non-empty at every n ≥ 4, and it covers both
-`z ∧ x_new` and `z ∨ x_new`. At n = 5 there are **at least fifteen** distinct classes — **eleven** in
-the lift closure plus **four** non-lifts — so the family is strictly richer than its own closure and is
-not one small case propagated by a construction. All fifteen are checked pairwise distinct by exhaustive
+`z ∧ x_new` and `z ∨ x_new`. At n = 5 there are **at least seventeen** distinct classes — **eleven** in
+the lift closure plus **six** non-lifts — so the family is strictly richer than its own closure and is
+not one small case propagated by a construction. All seventeen are checked pairwise distinct by exhaustive
 canonicalisation over the full 7680-element NPN group, in pure Python with no solver involved.
 
 The closure holds eleven rather than six because both lift directions are counted: 6 + 6 with exactly
@@ -30,14 +30,29 @@ to `z`. The counter asserts that explanation class by class. An earlier version 
 least ten": the count was low because the counting script generated only the AND-lifts, which Kirill
 Krinkin spotted on 2026-08-11 while checking these artefacts without running a solver.
 
-**All four non-lifts carry a forced-multi certificate produced with no symmetry breaking at all**, and
-all four CNF hashes are pinned in the manifest. Two of them were, until 2026-08-12, certified only through
+**All six non-lifts carry a forced-multi certificate produced with no symmetry breaking at all**, and
+their CNF hashes are pinned in the manifest. Two of them were, until 2026-08-12, certified only through
 a proved WLOG gate-ordering; re-running their at-most-one-shared query with the ordering switched off
-closed both — UNSAT in 214 s and 180 s, `drat-trim` `s VERIFIED`. So **`F₅ ≥ 15` needs no
+closed both — UNSAT in 214 s and 180 s, `drat-trim` `s VERIFIED`. So **`F₅ ≥ 17` needs no
 symmetry-breaking argument**, and the earlier split between `F₅ ≥ 13` certified and `F₅ ≥ 15` with the
 lemma is retired. Nothing in this bundle rests on that ordering. The headline never depended on it
 anyway: refuting "the family is only its lift closure" needs one non-canalizing witness, and there are
-four.
+six.
+
+The fifth and sixth arrived on 2026-08-14, from applying the construction behind three of the first four
+to **every** n = 4 seed instead of the one it was aimed at: eighteen constructions, each decided in two
+stages (does the gap survive; if so, does forcedness). `0x07bc0514` and `0x57fd07bc` came back UNSAT at
+`k = 9` with `s VERIFIED` in 3869 s and 3159 s.
+
+**What travels and what does not.** This bundle pins four of the six certificates, with CNF and DRAT
+hashes and a regenerator you can run. The two from 2026-08-14 are pinned by CNF hash only
+(`b1aa73f8b28408b0`, `36fa40b5b325aa31`): their DRAT proofs are **4.5 GB and 3.9 GB**, too large to ship,
+where the largest proof embedded here is 27 MB. Reproducing them means re-running the solver — about an
+hour of `kissat` and another of `drat-trim` per class on one core — rather than checking a shipped proof.
+We say so rather than let the count imply four hashes cover six classes. The same sweep killed five other candidates by an audited
+satisfying assignment, and the split is by **seed**, not by construction: two of the six seeds preserve
+forcedness in all three variants and three preserve it in none, including variants where the gap
+survives. Which property of the seed decides is open.
 
 **On rarity, the honest version:** the random census found one witness in 14,466 sampled truth tables,
 and that is a **yield, not a density** — the sampler is deliberately biased toward sparse, low-cost
