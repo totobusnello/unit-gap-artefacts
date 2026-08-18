@@ -1,5 +1,11 @@
 # Technote — Krinkin's Theorem 7 (Two-Mechanism) is false as stated
 
+<!-- snapshot-stamp -->
+> **Snapshot de 2026-08-07.** Esta é uma nota de trabalho: os números aqui são o estado do
+> artefato NAQUELE dia e **não** são reconferidos por gate. O valor corrente de qualquer
+> contagem vive no CSV que a produziu (`experiments/ [private tree]`), lido por
+> `bash tools/numbers.sh`; o estágio do projeto vive em [`STATUS.md`](../../STATUS.md). Divergência entre esta nota e o artefato resolve-se **a favor do artefato**.
+
 > **Claim `7P-PNP-CLM-0033`** (FINITE_SCOPE_VERIFIED, n=4, 2026-08-06). Short note, citable
 > alongside the v4 withdrawal of arXiv:2603.08033. Follows the LASTRO standard
 > (`../13_WRITEUP_STANDARD.md`). Reviewed by the pre-communication gate (Codex REV-0060 +

@@ -1,5 +1,11 @@
 # Technote — The forced-multiple-reconvergence family (Z) generalizes beyond n=4
 
+<!-- snapshot-stamp -->
+> **Snapshot de 2026-08-07.** Esta é uma nota de trabalho: os números aqui são o estado do
+> artefato NAQUELE dia e **não** são reconferidos por gate. O valor corrente de qualquer
+> contagem vive no CSV que a produziu (`experiments/ [private tree]`), lido por
+> `bash tools/numbers.sh`; o estágio do projeto vive em [`STATUS.md`](../../STATUS.md). Divergência entre esta nota e o artefato resolve-se **a favor do artefato**.
+
 > **Claim `7P-PNP-CLM-0035`** (FINITE_SCOPE_VERIFIED, n=5 witnesses, 2026-08-07). Succeeds
 > claim 0034. Where 0034 established the family Z at n=4 (gap=1 AIGs whose *every* size-optimal
 > realization has ≥2 fan-out-2 gates — forced multiple reconvergence), this note shows the

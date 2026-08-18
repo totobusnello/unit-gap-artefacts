@@ -1,5 +1,11 @@
 # Closing the Last Two Unresolved Entries of the NPN-4 Exact AIG Size Catalog: opt(0x1669) = opt(0x166b) = 10
 
+<!-- snapshot-stamp -->
+> **Snapshot de 2026-07-26.** Esta é uma nota de trabalho: os números aqui são o estado do
+> artefato NAQUELE dia e **não** são reconferidos por gate. O valor corrente de qualquer
+> contagem vive no CSV que a produziu (`experiments/ [private tree]`), lido por
+> `bash tools/numbers.sh`; o estágio do projeto vive em [`STATUS.md`](../../STATUS.md). Divergência entre esta nota e o artefato resolve-se **a favor do artefato**.
+
 **Status interno:** DRAFT v2 (2026-07-11) — v1 revisada por REV-0007 (Codex/GPT-5.6, NEEDS_REVISION,
 14 findings, todos adjudicados; registro em `../../07_MODEL_CALL_LOG.md`). Este bloco de status e as
 referências internas saem de qualquer versão pública. Publicação/preprint SOMENTE com autorização de

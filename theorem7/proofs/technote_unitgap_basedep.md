@@ -1,5 +1,11 @@
 # The "Unit Gap" Is Base-Dependent: A Mechanically Verified Refutation and a Three-Base Census at n ≤ 4
 
+<!-- snapshot-stamp -->
+> **Snapshot de 2026-07-26.** Esta é uma nota de trabalho: os números aqui são o estado do
+> artefato NAQUELE dia e **não** são reconferidos por gate. O valor corrente de qualquer
+> contagem vive no CSV que a produziu (`experiments/ [private tree]`), lido por
+> `bash tools/numbers.sh`; o estágio do projeto vive em [`STATUS.md`](../../STATUS.md). Divergência entre esta nota e o artefato resolve-se **a favor do artefato**.
+
 **Status interno:** DRAFT v1 (2026-07-13). Consolida claims 7P-PNP-CLM-0024..0029 (ledger), a
 formalização Lean (`../formal/UnitGap.lean`) e os censos das 3 bases (`../experiments/npn4_bases.csv`).
 Revisão adversarial da refutação: 4 famílias (REV-0009..0012); do censo AIG: 2 famílias

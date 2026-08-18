@@ -20,7 +20,7 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
   every n ≥ 4. Corroborated by DRAT at n = 4, 5, 6.
 - **Density**: at n = 5 the family exceeds its own lift closure — witness `f = 0x03de ∧ (¬x₀ ∨ x₄)`
   (`0x03de0154`): non-canalizing, opt = 8, tree = 9 (gap = 1), forced-multi. Counting NPN classes,
-  n = 5 has **at least fifteen** — **eleven** lift classes plus **four non-lifts** — all checked
+  n = 5 has **at least seventeen** — **eleven** lift classes plus **six non-lifts** — all checked
   pairwise distinct by exhaustive canonicalisation over the full NPN group, in pure Python with no
   solver. So the family is a genuine object, not one small case propagated by a construction.
   *Corrected 2026-08-11:* this said "at least ten" because the counting script generated only the
@@ -35,8 +35,9 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
   at-most-one-shared query was re-run for both with the ordering switched off and both closed — UNSAT in
   214 s and 180 s, `drat-trim` `s VERIFIED`, CNFs `39d9bd8db8daeb8b` and `378fa46181ed496b` now pinned.
   Therefore:
-  - **all fifteen classes need no symmetry-breaking argument** — the eleven lift classes (by the Lift
-    Theorem, from the no-SB-certified n = 4 base) plus **all four** pinned non-lifts;
+  - **all seventeen classes need no symmetry-breaking argument** — the eleven lift classes (by the Lift
+    Theorem, from the no-SB-certified n = 4 base) plus **all six** pinned non-lifts; the fifth and sixth
+    were certified on 2026-08-14 by the systematic `beside` sweep, UNSAT at k = 9 with `s VERIFIED`;
   - **nothing in this bundle rests on the soundness of `gate_order_b`.** The earlier split between
     `F₅ ≥ 13` certified and `F₅ ≥ 15` with the lemma is retired; it was a budget limit read as a limit of
     the method, and the budget was the thing that changed.
@@ -180,7 +181,7 @@ drat-trim verify/sample_certs/n5_0x03de0154_opt_k3.cnf \
           verify/sample_certs/n5_0x03de0154_opt_k3.drat   # expect: s VERIFIED
 ```
 
-## Count the classes (F₅ ≥ 15)
+## Count the classes (F₅ ≥ 17)
 
 ```sh
 python3 verify/npn_check_f5.py
@@ -216,6 +217,31 @@ trust. It does **not** establish that each of the fifteen is forced-multi; that 
 the certificates, and as of 2026-08-12 **all four** non-lifts carry theirs on the no-SB path — see
 *What is claimed* above, and `manifest.csv`, which now pins a CNF hash for each of the four. A reader who
 accepts only plain DRAT gets `F₅ ≥ 15`.
+
+### The `path` column, and how to check it rather than believe it
+
+Since 2026-08-13 every row of `manifest.csv` carries a **`path`** column with one of three values, so that
+"no symmetry breaking anywhere" is a field you can filter instead of a sentence you have to trust:
+
+| value | meaning |
+|---|---|
+| `no-sb` | the instance was built on the encoder's default path — no gate-ordering symmetry break, no relaxation |
+| `sb` | the certificate needed the WLOG gate-ordering. **No row currently carries this.** |
+| `n/a` | the leg uses no solver at all, so there is no symmetry breaking to use or avoid |
+
+Today that reads **45 `no-sb`, 0 `sb`, 3 `n/a`** across 48 legs. The three `n/a` are the two
+`non-canalizing` legs (a constant-cofactor test) and the `F₅` count (exhaustive NPN canonicalisation) —
+they are deliberately **not** labelled `no-sb`, because calling a solver-free leg "certified without
+symmetry breaking" would inflate that count with legs no solver ever touched.
+
+The values are **derived, not typed**: `tools/manifest_path.py` maps each leg to a rule that points at the
+evidence in the generator's source (`reproduce_witness.py` builds every instance as
+`AIGEncoder(N, k, TT[, formula=True])` with no `gate_order_b` and no `relax`; the forced-multi leg calls
+`build_amo_shared(..., gate_order_b=False, n=N)` explicitly). A leg matching no rule aborts the tool rather
+than receiving a default — a `no-sb` assigned by convenience would be worse than the missing column it
+replaced. `tools/wall_n5.py` then checks the column against the prose already in the `leg` field and
+reports a **conflict** if they disagree, because two sources for one fact with nobody comparing them is
+how the old convention survived unexamined.
 
 ## A class nobody aimed at
 
