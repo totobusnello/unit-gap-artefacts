@@ -20,13 +20,26 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
   every n ≥ 4. Corroborated by DRAT at n = 4, 5, 6.
 - **Density**: at n = 5 the family exceeds its own lift closure — witness `f = 0x03de ∧ (¬x₀ ∨ x₄)`
   (`0x03de0154`): non-canalizing, opt = 8, tree = 9 (gap = 1), forced-multi. Counting NPN classes,
-  n = 5 has **at least seventeen** — **eleven** lift classes plus **six non-lifts** — all checked
+  n = 5 has **at least twenty-one** — **eleven** lift classes plus **ten non-lifts** — all checked
   pairwise distinct by exhaustive canonicalisation over the full NPN group, in pure Python with no
   solver. So the family is a genuine object, not one small case propagated by a construction.
   *Corrected 2026-08-11:* this said "at least ten" because the counting script generated only the
   AND-lifts while the Lift Theorem covers `z ∧ x` **and** `z ∨ x`. Counting both directions the lift
   closure is 11 classes, not 6 — 6 + 6 with exactly one collision, at the single NP-self-complementary
   class among the six. Found by Kirill Krinkin, reading the artefacts without a solver.
+  *Updated 2026-08-22:* four of the ten non-lifts are new, and they are the cheapest members known —
+  `0x0001aac9`, `0x0003dcde`, `0x0007a8a7`, `0x000ff3fd`, each with **opt = 7**, against opt ∈ {8, 9}
+  for every witness held before. They come from an exhaustive scan of the `opt = 7` level, which is
+  complete: no function of **five essential variables** is forced-multi with gap = 1 and opt ≤ 6 (the
+  level opt = 5 is excluded by an edge-counting bound, opt = 6 by exhaustion over its 62 400
+  candidates), so **the cheapest F-type function of five essential variables costs exactly seven
+  gates**. Each of the four carries its own DRAT chain with no ordering argument.
+  The essentiality qualifier is load-bearing, not decoration: drop it and the statement is false.
+  Padding the n = 4 witness with an inert fifth variable gives `0x03de03de`, a 32-bit truth table that
+  is forced-multi with gap = 1 at opt = 6 — certified here on the same chain as the others (opt UNSAT
+  k = 1..5 with `drat-trim` VERIFIED, SAT at k = 6 re-simulated, formula-mode tree = 7, and
+  at-most-one-shared UNSAT VERIFIED). It is the n = 4 phenomenon wearing a fifth variable, not a new
+  five-variable one, which is exactly what the qualifier excludes.
 - **The count splits by trust path, and this file states the split rather than averaging it.** Two of
   the four non-lifts — `0x03de0154` and `0x09c50800` — have their forced-multi certificate produced
   **with no symmetry breaking at all** (vetted encoder, `gate_order_b = False`), and those are the two
@@ -35,7 +48,7 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
   at-most-one-shared query was re-run for both with the ordering switched off and both closed — UNSAT in
   214 s and 180 s, `drat-trim` `s VERIFIED`, CNFs `39d9bd8db8daeb8b` and `378fa46181ed496b` now pinned.
   Therefore:
-  - **all seventeen classes need no symmetry-breaking argument** — the eleven lift classes (by the Lift
+  - **all twenty-one classes need no symmetry-breaking argument** — the eleven lift classes (by the Lift
     Theorem, from the no-SB-certified n = 4 base) plus **all six** pinned non-lifts; the fifth and sixth
     were certified on 2026-08-14 by the systematic `beside` sweep, UNSAT at k = 9 with `s VERIFIED`;
   - **nothing in this bundle rests on the soundness of `gate_order_b`.** The earlier split between
@@ -181,15 +194,15 @@ drat-trim verify/sample_certs/n5_0x03de0154_opt_k3.cnf \
           verify/sample_certs/n5_0x03de0154_opt_k3.drat   # expect: s VERIFIED
 ```
 
-## Count the classes (F₅ ≥ 17)
+## Count the classes (F₅ ≥ 21)
 
 ```sh
 python3 verify/npn_check_f5.py
 ```
 
 Pure Python, no solver, seconds to run: canonicalizes every witness over the full n = 5 NPN group (all
-7680 transforms) and reports **15** distinct classes — **11** in the lift closure (6 AND-lifts + 6
-OR-lifts, exactly one collision) plus the 4 non-lifts. It also asserts *why* there is exactly one
+7680 transforms) and reports **21** distinct classes — **11** in the lift closure (6 AND-lifts + 6
+OR-lifts, exactly one collision) plus the **ten** non-lifts. It also asserts *why* there is exactly one
 collision: `OR-lift(z) ≅ AND-lift(¬z)` under NPN spends the output negation, so the two lifts of `z`
 coincide iff `z` is NP-self-complementary, and exactly one of the six n = 4 classes is. The check fails
 loudly if that explanation ever stops holding.
@@ -198,7 +211,7 @@ loudly if that explanation ever stops holding.
 object with its canonical form — so you can recount it without trusting the summary, or us:
 
 ```sh
-tail -n +2 verify/f5_classes.csv | cut -d, -f5 | sort -u | wc -l                      # 15
+tail -n +2 verify/f5_classes.csv | cut -d, -f5 | sort -u | wc -l                      # 21
 tail -n +2 verify/f5_classes.csv | grep -v non-lift | cut -d, -f5 | sort -u | wc -l   # 11 in the closure
 awk -F, 'NR>1 && $6==2 {print $1}' verify/f5_classes.csv                              # the colliding pair
 ```

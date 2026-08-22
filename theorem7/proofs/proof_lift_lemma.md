@@ -131,10 +131,16 @@ By §4, `C'` (obtained by contracting the unique gate `g`, a pass-through to `a`
 reconvergence count, so `C'` has ≤ 1 reconvergence — contradicting that `z` is forced-multi
 (which forces ≥ 2). This contradiction proves `f` is forced-multi.
 
-*The contraction is non-increasing.* **Convention:** fan-out counts edge-occurrences and the
-circuit output counts as one consumer; thus every used gate has fan-out ≥ 1, and the case
-"`g` is the output" is just `|S_g| ≥ 1` with the output terminal among `g`'s consumers (after
-contraction the output reads `a`). Let `g` have consumer multiset `S_g` (`|S_g| = fan-out(g)`).
+*The contraction is non-increasing.* **Convention (corrected 2026-08-19):** fan-out is the number of
+**distinct consumer gates**, and the output is **not** a consumer — this is what the encoder
+implements (`zc_certify.py`, `build_amo_shared`: one indicator `u[(i,j)]` per consumer gate `j`, and
+`z[i]` forced only by two *distinct* `j`). The earlier wording here said edge-occurrences with the
+output as a consumer; formalising the definitions in Lean showed that is not the encoder's counting
+(`formal/ThresholdTree.lean`, `sharing_defs_differ`). Nothing downstream moves — see the correction in
+§2.1 of the paper for why the readings coincide on size-optimal circuits — but the case "`g` is the
+output" is now separate: there `|S_g| = 0`, contracting `g` makes `a` the output, `a` loses a consumer,
+and `g` (fan-out 0, never a reconvergence) disappears, so the count cannot rise. Assume below that `g`
+is not the output. Let `g` have consumer set `S_g` (`|S_g| = fan-out(g) ≥ 1`).
 Contracting `g` (pass-through to `a`) removes `g` and makes every consumer in `S_g` read `a`.
 Only `a`'s fan-out changes: from `deg(a)` to `deg(a) − 1 + |S_g|` (it loses `g`, gains `S_g`) —
 and if some consumer already reads both `a` and `g`, distinct-consumer counting makes this an
@@ -153,6 +159,147 @@ internal gate with fan-out ≥ 2):
 In every case `reconv(C') ≤ reconv(C) ≤ 1`. But `C'` is an `opt(z)`-gate circuit for `z`, and
 `z` is forced-multi, so `reconv(C') ≥ 2`. Contradiction. Hence every optimal `C` for `f` has
 ≥ 2 reconvergences: `f` is forced-multi. ∎
+
+**Machine-checked (2026-08-19).** The non-increase claim above — the whole "*the contraction is
+non-increasing*" block — is now `numReconv_contract_le` in `formal/ThresholdTree.lean`, proved with
+kernel axioms only. The four bullets survive as the two cases of the Lean proof: away from `a` the
+fan-out can only fall, and at `a` it is paid for either by the released edge (`|S_g| = 1`) or by `g`'s
+own disappearance from the count (`|S_g| ≥ 2`).
+
+One thing the formalisation caught. The step `deg(a) → deg(a) − 1 + |S_g|` uses **`g ∈ C_a`** — the
+contracted gate is itself a consumer of `a`, and stops being one. The prose above says it ("it loses
+`g`"); the first Lean statement did not carry it as a hypothesis and was therefore **false**. Four gates
+suffice to break it: with `n = 1`, let `w₁` and `w₂` each have exactly one consumer and let `w₂` *not*
+read `w₁`; contracting `w₂` into `w₁` hands `w₁` two distinct consumers and the count rises from 0 to 1
+(`contract_needs_refs`, axiom-free). The corrected statement requires `refsWire (gs.get p) a`, which is
+what `IsPassThrough` delivers semantically. Nothing in the argument of this note changes — the omission
+was in the formal statement, not in the proof.
+
+**A second defect, in the definition rather than the statement (same day).** The contraction is only
+sound *up to the inversion of the pass-through*: if `g = AND(¬w_a, x)` then under `σ : x = 1` the gate
+carries `¬val(a)`, and rewiring `g`'s consumers to `a` must flip the polarity of those edges. The first
+Lean definition of `contract` did not, so contracting an inverted pass-through changed the computed
+function — and not by a global inversion the free output negation would absorb. Three gates suffice
+(`contract_needs_polarity`). The inversion is now a parameter of the contraction. Note that the
+*combinatorial* lemma was blind to this: fan-out reads wire indices, never polarities. Proving one half
+said nothing about the definition the other half needs.
+
+**A third defect, this one a missing case (2026-08-20).** Contracting a gate renumbers the wires above it,
+so the contracted circuit's output is whichever gate was second-to-last. If the contracted gate `g` is
+**not** the output, that is the old output and the function is preserved unchanged. If `g` **is** the
+output — which is precisely what §5.5 produces in the lift direction, since restricting `x = 1` in
+`z ∧ x` turns the *output* gate into the pass-through — the new output is the previous gate, which in
+general is unrelated to `a`. Two gates break it (`contract_needs_nonoutput`). So the output case is not a
+corner to exclude but a case to state, and it holds exactly when `a` is the wire of that previous gate;
+there the function is recovered up to `inv`. Both cases are now proved
+(`circuitOut_contract`, `circuitOut_contract_output`), and with the combinatorial half this closes §6 of
+this note in Lean.
+
+Worth noting for §5.5: the argument there must therefore say **which** gate the restriction contracts and
+where `a` sits, not merely that a pass-through appears. In the lift direction it is the output gate and
+`a` is the top gate of `z`'s circuit — the hypothesis holds. In the direction that starts from an
+arbitrary optimal circuit for `f`, the gate reading `x` can be anywhere, and if it is the output then `a`
+must be shown to be the previous gate. That is a real obligation on §5.5, surfaced by the formalisation.
+
+*Update 2026-08-20.* Two of §5.5(a)'s three parts are now separated, and one is discharged. **Existence**
+of a reader of `x_new` is machine-checked (`exists_reader_of_liftAnd`), and it does not come from the
+counting argument at all: if nothing read `x_new`, dropping the variable would yield the same circuit over
+`n` inputs, so the output could not depend on `x_new`. The hypothesis `z` not identically `0` is load-
+bearing — for `z ≡ 0` the constant-false circuit computes `A z` reading nothing.
+
+For **uniqueness**, the two-reader case has to become a construction, and the obligation above turns out
+to be vacuous in exactly that case: contract the reader of *smallest* index and it cannot be the output,
+since a second reader `q` gives `p < q < m`. Two supporting facts are checked — contracting one reader
+leaves the others reading `x_new` (`second_reader_survives`), and the semantic lemmas of §5.7 are already
+pointwise in the assignment, so they apply on the slice `x_new = 1`, which is the only place a reader is a
+pass-through. The residue is therefore narrower than "§5.5(a)": it is the single-reader-at-the-output case
+plus positivity.
+
+*Plan corrected the same day.* Trying to discharge the positional hypothesis produced a counterexample
+to the **formal** lower bound, and the obstruction sits in the model, not in the proof. `circuitOut`
+returns the last gate, so the model cannot express the zero-gate circuit that returns an input; on the
+formula side `Frm` has a `.var` leaf and a literal costs `0`. For `z` a literal: `tree(z) = 0`,
+`opt(z) = 1`, and `opt(A z) = 1` rather than `2` (`lift_fails_on_literal`,
+`model_asymmetric_on_literal`). In the convention this note uses, a literal costs `0` and `1 = 0 + 1`:
+**the mathematics here does not move.** What moves is the status of the positional hypothesis — it is
+**necessary in this model**, not a residue of an unfinished proof, and what it excludes is exactly the
+literal. `lift_lemma` escapes through its gap hypothesis (`0 = 2`), by accident rather than by design.
+
+Route chosen: keep the model and carry "`z` is not a literal" as an explicit hypothesis where the lower
+bound needs it, rather than give the model an output selector and re-audit everything that reads
+`circuitOut` — the same reasoning that settled the constant-wire question the same way. One obligation
+then remained: the truncation case, a sole reader at the output whose other input is a **gate** wire,
+where the prefix up to that gate already agrees on the slice. That case is now machine-checked
+(`slice_trunc_lower`): nothing is contracted, the prefix is truncated, it does not read `x_new` because
+the only reader was the output, and dropping the variable gives a circuit over `n` inputs with at most
+`m − 1` gates. The two output subcases therefore exhaust each other — gate wire is the truncation,
+input wire is where the model charges a literal one gate too many — and a non-vacuity control pins that
+the hypotheses are satisfiable and the bound tight.
+
+*And the counting argument closed the same day.* `uniq_reader`: two distinct gates reading `x_new` force
+`opt(z) + 2 ≤ m`, contradicting the §5.2 upper bound on an optimal circuit. The induction contracts one
+reader at a time, always one that is not the output — extracted from the reader count of the `dropLast`
+prefix, so no minimality and no `Nat.find`, which is Mathlib-only and unavailable here. It terminates in
+the three places above. The lower bound then holds in the form this note wanted: `opt(z) + 1 ≤ m` for any
+circuit computing `A z`, with no positional hypothesis (`opt_liftAnd_lower_nopos`).
+
+**And positivity turned out to need dispensing with rather than proving.** A reader whose only edge to
+`x_new` is inverted, or which points there with both edges, is constant on the slice — the paper's own
+case analysis, carried out with no hypothesis. A gate constant on the slice also yields a smaller
+slice-agreeing circuit, through the cascade: no consumer means it is dead and drops; a consumer of a
+constant is itself constant on the slice (recurse at a strictly larger index) or a pass-through there.
+
+The shape that makes it one induction: **every branch produces a strictly smaller circuit that still
+agrees with `z` on the slice.** Contraction, dead-gate removal and truncation all become instances, and
+truncation in that form no longer needs the prefix to be reader-free.
+
+**§5.3 is closed:** `opt(A z) = opt(z) + 1`, machine-checked, no hypothesis on the readers at all.
+
+**And §5.6 closed the same day.** `tree_liftAnd`: `tree(A z) = tree(z) + 1`. The design there follows
+from the type: `Frm` has a `.one` leaf but no false constant and no negation node, so restricting
+`x_new := 1` returns either a formula-with-polarity or a constant, said explicitly — the polarity travels
+in the result because synthesising a negation would cost the very gates being counted. The saved gate
+comes from the formula having to mention `x_new`, whose node then collapses.
+
+**Three of the four conclusions are machine-checked with no change to the statement**, because the gap
+hypothesis already excludes literals on its own: a literal has `tree = 0` and `opt = 1` in this model, so
+`tree(z) = opt(z) + 1` would read `0 = 2`.
+
+**And the forcedness transfer closed, so the `∧` case of this note is machine-checked end to end** (§7, the `∨` case, remains a paper proof — see the scope note below). The circuit for `z`
+extracted from the descent has exactly `opt(z)` gates — hence is optimal — and carries no more
+reconvergences than the circuit for `A z` it came from, so `ForcedMulti z` transfers upward. That needed
+a reconvergence bound for each of the three size-reducing operations rather than for contraction alone;
+dead-gate removal came for free, since it *is* a contraction with a freely chosen recipient.
+
+One statement written along the way was false: `dropVar` preserves fan-out only for wires other than
+`x_new`, because for `n = 0` the dropped wire collapses onto gate `0`'s wire. That is the same reason the
+semantic lemma already carried the no-reader side condition, so the two agree — and the boundary is
+pinned by a counterexample rather than left as a remark.
+
+**`lift_lemma` has no `sorry`.** The Lift Lemma is machine-checked under exactly the hypotheses stated
+here, in the formalisation's model.
+
+*Scope, stated because an earlier version of this note overstated it (Codex review, 2026-08-20).* As of
+2026-08-20 what was machine-checked was the **`∧` case**, and two steps remained paper proofs: §7 below
+(the `∨` case) and the convention bridge.
+
+**Update 2026-08-21: §7 is machine-checked** (`lift_lemma_or`; `lift_lemma_both` is the statement
+entire, both halves). It went by the **parenthetical** route of §7, not the verbatim one: rather than
+replaying §2–6 with the polarity flipped, the formalisation proves the two symmetries the parenthesis
+appeals to and lets the `∧` case do the work. `liftOr z = ¬(liftAnd (¬z) ∘ negLast)` pointwise;
+output negation is free by construction, because `CircuitComputes` and `FormulaComputes` are
+disjunctions over both polarities, so the set of circuits is unchanged; and negating an input is
+flipping the polarity of the edges that read that wire, which leaves `ia`/`ib` alone, so `fanOut` and
+`numReconv` are identical and "inversions do not change the gate DAG" is now a theorem
+(`numReconv_negIn`) rather than an appeal. One place the duality is not free, and the note should say
+it: on the formula side a leaf `.var i` has no parent edge to carry the polarity, so the transformation
+returns a flip flag which the free output inversion absorbs at the root.
+
+**One step remains a paper proof:** the bridge from the formalisation's convention (the output is the
+last gate) to the paper's (a designated output wire). The two agree except on literals, and that
+argument is about the *relation* between model and convention, so no statement inside the model can
+settle it. It is not a hole in the mathematics; it is a paper step, and an earlier sentence here counted
+it as none.
 
 ## 7. The `∨` case
 
