@@ -30,10 +30,16 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
   *Updated 2026-08-22:* four of the ten non-lifts are new, and they are the cheapest members known —
   `0x0001aac9`, `0x0003dcde`, `0x0007a8a7`, `0x000ff3fd`, each with **opt = 7**, against opt ∈ {8, 9}
   for every witness held before. They come from an exhaustive scan of the `opt = 7` level, which is
-  complete: no five-variable function is forced-multi with gap = 1 and opt ≤ 6 (the level opt = 5 is
-  excluded by an edge-counting bound, opt = 6 by exhaustion over its 62 400 candidates), so **the
-  cheapest F-type function at n = 5 costs exactly seven gates**. Each of the four carries its own DRAT
-  chain with no ordering argument.
+  complete: no function of **five essential variables** is forced-multi with gap = 1 and opt ≤ 6 (the
+  level opt = 5 is excluded by an edge-counting bound, opt = 6 by exhaustion over its 62 400
+  candidates), so **the cheapest F-type function of five essential variables costs exactly seven
+  gates**. Each of the four carries its own DRAT chain with no ordering argument.
+  The essentiality qualifier is load-bearing, not decoration: drop it and the statement is false.
+  Padding the n = 4 witness with an inert fifth variable gives `0x03de03de`, a 32-bit truth table that
+  is forced-multi with gap = 1 at opt = 6 — certified here on the same chain as the others (opt UNSAT
+  k = 1..5 with `drat-trim` VERIFIED, SAT at k = 6 re-simulated, formula-mode tree = 7, and
+  at-most-one-shared UNSAT VERIFIED). It is the n = 4 phenomenon wearing a fifth variable, not a new
+  five-variable one, which is exactly what the qualifier excludes.
 - **The count splits by trust path, and this file states the split rather than averaging it.** Two of
   the four non-lifts — `0x03de0154` and `0x09c50800` — have their forced-multi certificate produced
   **with no symmetry breaking at all** (vetted encoder, `gate_order_b = False`), and those are the two

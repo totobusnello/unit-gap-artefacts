@@ -58,8 +58,13 @@ six gates — exactly what the closure theorem predicts — and four of which ar
 Each carries its own chain with no ordering argument: `opt` by UNSAT at `k = 1..6`, every leg
 `drat-trim` `s VERIFIED`, plus a re-simulated model at `k = 7`; `tree = 8` by a formula-mode UNSAT at
 `k = 7` and a witness at `k = 8`; forced-multi by an at-most-one-shared UNSAT, also VERIFIED. So **the
-cheapest forced-multi function with unit gap at `n = 5` costs exactly seven gates**, against `opt` of 8
-or 9 for every witness held before.
+cheapest forced-multi function with unit gap on five essential variables costs exactly seven gates**,
+against `opt` of 8 or 9 for every witness held before.
+
+Essentiality is part of the statement, not a footnote. Without it the claim is false: pad the n = 4
+witness with an inert fifth variable and you get `0x03de03de`, forced-multi with unit gap at `opt = 6`,
+certified on the same chain (`verify/sample_certs/n5_0x03de03de_opt_k1..4`). That function is the n = 4
+phenomenon in five-variable clothing, which is what the qualifier is there to exclude.
 
 Two things that scan does *not* establish, and the distinction matters. `F₅ ≥ 21` rests on the four
 certificates alone — the enumeration is how they were found, not why they hold. And the claim that level
