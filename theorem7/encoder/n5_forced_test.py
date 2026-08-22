@@ -180,6 +180,20 @@ def main():
     ver = drat_verify(cnf, drat)
     print(f"  forced-multi: at-most-1-shared UNSAT (drat-trim={'VERIFIED' if ver else 'FAIL'}) "
           f"cnf_sha={sha16(cnf)} drat_sha={sha16(drat)}")
+
+    # The three legs are ASSERTED, not merely interpolated into the verdict. Before this guard the
+    # headline VERDICT printed and main() returned 0 even with ok_lb, tree_ok or ver False, so a
+    # caller doing `n5_forced_test.py ... && echo certified` saw success on a broken chain. The same
+    # lesson had already been learned for verify_circuit above (REV-0097 finding 6a) and was not
+    # swept to its three siblings; the adversarial panel of 2026-08-22 found the survivors.
+    legs = {"opt-LB DRAT": ok_lb, "tree gap=1": tree_ok, "forced-multi DRAT": ver}
+    broken = [k for k, v in legs.items() if not v]
+    if broken:
+        print(f"\n  !!! VERDICT WITHHELD [{tag}]: at-most-1-shared is UNSAT, but the certification "
+              f"chain does not close — failed leg(s): {', '.join(broken)}. "
+              f"forced-multi is NOT established for this function.")
+        return 1
+
     print(f"\n  *** VERDICT [{tag}]: FORCED MULTIPLE RECONVERGENCE at n={N} — Z-like. "
           f"Claim 0034's phenomenon GENERALIZES (opt LB DRAT={ok_lb}, tree gap=1={tree_ok}, "
           f"forced-multi DRAT={ver}). ***")
