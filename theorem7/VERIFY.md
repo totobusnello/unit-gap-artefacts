@@ -20,13 +20,20 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
   every n ≥ 4. Corroborated by DRAT at n = 4, 5, 6.
 - **Density**: at n = 5 the family exceeds its own lift closure — witness `f = 0x03de ∧ (¬x₀ ∨ x₄)`
   (`0x03de0154`): non-canalizing, opt = 8, tree = 9 (gap = 1), forced-multi. Counting NPN classes,
-  n = 5 has **at least seventeen** — **eleven** lift classes plus **six non-lifts** — all checked
+  n = 5 has **at least twenty-one** — **eleven** lift classes plus **ten non-lifts** — all checked
   pairwise distinct by exhaustive canonicalisation over the full NPN group, in pure Python with no
   solver. So the family is a genuine object, not one small case propagated by a construction.
   *Corrected 2026-08-11:* this said "at least ten" because the counting script generated only the
   AND-lifts while the Lift Theorem covers `z ∧ x` **and** `z ∨ x`. Counting both directions the lift
   closure is 11 classes, not 6 — 6 + 6 with exactly one collision, at the single NP-self-complementary
   class among the six. Found by Kirill Krinkin, reading the artefacts without a solver.
+  *Updated 2026-08-22:* four of the ten non-lifts are new, and they are the cheapest members known —
+  `0x0001aac9`, `0x0003dcde`, `0x0007a8a7`, `0x000ff3fd`, each with **opt = 7**, against opt ∈ {8, 9}
+  for every witness held before. They come from an exhaustive scan of the `opt = 7` level, which is
+  complete: no five-variable function is forced-multi with gap = 1 and opt ≤ 6 (the level opt = 5 is
+  excluded by an edge-counting bound, opt = 6 by exhaustion over its 62 400 candidates), so **the
+  cheapest F-type function at n = 5 costs exactly seven gates**. Each of the four carries its own DRAT
+  chain with no ordering argument.
 - **The count splits by trust path, and this file states the split rather than averaging it.** Two of
   the four non-lifts — `0x03de0154` and `0x09c50800` — have their forced-multi certificate produced
   **with no symmetry breaking at all** (vetted encoder, `gate_order_b = False`), and those are the two
@@ -35,7 +42,7 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
   at-most-one-shared query was re-run for both with the ordering switched off and both closed — UNSAT in
   214 s and 180 s, `drat-trim` `s VERIFIED`, CNFs `39d9bd8db8daeb8b` and `378fa46181ed496b` now pinned.
   Therefore:
-  - **all seventeen classes need no symmetry-breaking argument** — the eleven lift classes (by the Lift
+  - **all twenty-one classes need no symmetry-breaking argument** — the eleven lift classes (by the Lift
     Theorem, from the no-SB-certified n = 4 base) plus **all six** pinned non-lifts; the fifth and sixth
     were certified on 2026-08-14 by the systematic `beside` sweep, UNSAT at k = 9 with `s VERIFIED`;
   - **nothing in this bundle rests on the soundness of `gate_order_b`.** The earlier split between

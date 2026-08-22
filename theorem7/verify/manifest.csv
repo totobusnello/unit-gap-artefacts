@@ -10,7 +10,7 @@ result,leg,k,cnf_sha16,verdict,regenerate,path
 7th-class witness 0x03de0154,tree upper bound (fan-out-1 formula),9,8fa10b4d591f800f,SAT / verify_circuit self-certifying => tree<=9,reproduce_witness.py,no-sb
 7th-class witness 0x03de0154,forced-multi (amo-shared NO symmetry break),8,ed3b8350f72f8078,UNSAT / drat-trim VERIFIED => every optimum has >=2 reconvergences,reproduce_witness.py --full,no-sb
 7th-class witness 0x03de0154,non-canalizing (no constant cofactor),,,combinatorial => not an AND/OR-lift,reproduce_witness.py,n/a
-F5 count,>=17 distinct NPN classes (11 in the lift closure: 6 AND-lifts + 6 OR-lifts with one collision; + 6 non-lifts),,,exhaustive full NPN group (7680 transforms) no solver; result artefact exp_krinkin_cor6/f5_classes.csv,npn_check_f5.py,n/a
+F5 count,>=21 distinct NPN classes (11 in the lift closure: 6 AND-lifts + 6 OR-lifts with one collision; + 10 non-lifts: 6 by construction/sweep + 4 from the exhaustive opt=7 scan of 2026-08-22),,,exhaustive full NPN group (7680 transforms) no solver; result artefact exp_krinkin_cor6/f5_classes.csv,npn_check_f5.py,n/a
 10th-class witness 0x09c50800 (claim 0038; promoted 2026-08-10; panel 3/3 GO),opt lower bound,1,93e5b48eeace3859,UNSAT / drat-trim VERIFIED,reproduce_witness.py 0x09c50800,no-sb
 10th-class witness 0x09c50800 (claim 0038; promoted 2026-08-10; panel 3/3 GO),opt lower bound,2,325da4d52baf998b,UNSAT / drat-trim VERIFIED,reproduce_witness.py 0x09c50800,no-sb
 10th-class witness 0x09c50800 (claim 0038; promoted 2026-08-10; panel 3/3 GO),opt lower bound,3,2d97b762cf4a1673,UNSAT / drat-trim VERIFIED,reproduce_witness.py 0x09c50800,no-sb

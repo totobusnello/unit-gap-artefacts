@@ -59,6 +59,19 @@ NONLIFTS = {
     # é o dado que sustenta a hipótese de que a forçosidade sob `beside` é propriedade da semente.
     "0x07bc0514": 0x07BC0514,   # beside `z and (~x0 or x4)`, no-SB certificate, 3869s
     "0x57fd07bc": 0x57FD07BC,   # beside `z or (~x0 and x4)`, no-SB certificate, 3159s
+    # Acrescentadas 2026-08-22 pelo varrimento EXAUSTIVO do nível `opt = 7` (claim 0086,
+    # `exp_gap1_exact/`). Não vieram de construção nenhuma — vieram de enumerar todos os circuitos de
+    # sete portas, o que também estabelece que `opt = 7` é o custo MÍNIMO de um F-type em n=5 (o nível
+    # 6 é vazio: `opt = 5` cai pela cota de contagem de arestas da claim 0083, `opt = 6` por exaustão
+    # sobre os seus 62 400 candidatos). São as quatro membros mais baratas conhecidas da família: todas
+    # as anteriores custam `opt` 8 ou 9. Cada uma com cadeia DRAT completa e sem symmetry breaking —
+    # opt por UNSAT k=1..6 `drat-trim VERIFIED` mais SAT em k=7 re-simulado, `tree = 8` por fórmula
+    # UNSAT k=7 VERIFIED mais SAT k=8, forced-multi por at-most-one-shared UNSAT VERIFIED.
+    # Nenhuma é balanceada (pesos 9, 13, 11, 17), logo nenhuma pode contribuir para `s₅`.
+    "0x0001aac9": 0x0001AAC9,   # exhaustive opt=7 scan, no-SB certificate
+    "0x0003dcde": 0x0003DCDE,   # exhaustive opt=7 scan, no-SB certificate
+    "0x0007a8a7": 0x0007A8A7,   # exhaustive opt=7 scan, no-SB certificate
+    "0x000ff3fd": 0x000FF3FD,   # exhaustive opt=7 scan, no-SB certificate
 }
 
 
