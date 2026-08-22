@@ -10,12 +10,17 @@ This script counts both directions. It is pure Python over the full NPN group of
 5!*2^5*2 = 7680 transforms) — no solver, so anyone can re-run it in seconds and the result depends on
 no certificate.
 
-RESULT (2026-08-11): **F5 >= 15**, not 10. Decomposed:
+RESULT (2026-08-22): **F5 >= 21**. Decomposed:
   * 6 AND-lifts  -> 6 distinct classes
   * 6 OR-lifts   -> 6 distinct classes
   * exactly ONE collision between the two sets, so the lift closure is **11** classes, not 6
-  * 4 non-lift witnesses, pairwise distinct and distinct from all lifts
-  => 11 + 4 = 15
+  * 10 non-lift witnesses, pairwise distinct and distinct from all lifts
+  => 11 + 10 = 21
+
+SUPERSEDED, kept because the number was published: (2026-08-11) said F5 >= 15 = 11 + 4 non-lifts.
+The four classes added on 2026-08-22 came from the exhaustive opt=7 scan. The adversarial panel of
+2026-08-22 flagged that this header contradicted the script's own stdout — a file whose docstring
+disagrees with what it prints teaches the reader to trust neither.
 
 WHY EXACTLY ONE COLLISION, and it is not a coincidence. Under NPN of the 5-variable function,
 `OR-lift(z) = 0xFFFF0000 | z` maps to `AND-lift(~z)`: negate the output, then negate x4. The output

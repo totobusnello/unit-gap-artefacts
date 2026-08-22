@@ -188,15 +188,15 @@ drat-trim verify/sample_certs/n5_0x03de0154_opt_k3.cnf \
           verify/sample_certs/n5_0x03de0154_opt_k3.drat   # expect: s VERIFIED
 ```
 
-## Count the classes (F₅ ≥ 17)
+## Count the classes (F₅ ≥ 21)
 
 ```sh
 python3 verify/npn_check_f5.py
 ```
 
 Pure Python, no solver, seconds to run: canonicalizes every witness over the full n = 5 NPN group (all
-7680 transforms) and reports **15** distinct classes — **11** in the lift closure (6 AND-lifts + 6
-OR-lifts, exactly one collision) plus the 4 non-lifts. It also asserts *why* there is exactly one
+7680 transforms) and reports **21** distinct classes — **11** in the lift closure (6 AND-lifts + 6
+OR-lifts, exactly one collision) plus the **ten** non-lifts. It also asserts *why* there is exactly one
 collision: `OR-lift(z) ≅ AND-lift(¬z)` under NPN spends the output negation, so the two lifts of `z`
 coincide iff `z` is NP-self-complementary, and exactly one of the six n = 4 classes is. The check fails
 loudly if that explanation ever stops holding.
@@ -205,7 +205,7 @@ loudly if that explanation ever stops holding.
 object with its canonical form — so you can recount it without trusting the summary, or us:
 
 ```sh
-tail -n +2 verify/f5_classes.csv | cut -d, -f5 | sort -u | wc -l                      # 15
+tail -n +2 verify/f5_classes.csv | cut -d, -f5 | sort -u | wc -l                      # 21
 tail -n +2 verify/f5_classes.csv | grep -v non-lift | cut -d, -f5 | sort -u | wc -l   # 11 in the closure
 awk -F, 'NR>1 && $6==2 {print $1}' verify/f5_classes.csv                              # the colliding pair
 ```
