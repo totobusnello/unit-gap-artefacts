@@ -18,9 +18,9 @@ whose *every* size-optimal circuit is forced to reconverge (the **forced-reconve
 
 At n = 4 the family has exactly six NPN classes, exhaustively. The Lift Theorem (a paper proof,
 corroborated by certificates at n = 4, 5 and 6) makes it non-empty at every n ≥ 4, and it covers both
-`z ∧ x_new` and `z ∨ x_new`. At n = 5 there are **at least twenty-one** distinct classes — **eleven** in
+`z ∧ x_new` and `z ∨ x_new`. At n = 5 there are **at least 74** distinct classes — **eleven** in
 the lift closure plus **ten** non-lifts — so the family is strictly richer than its own closure and is
-not one small case propagated by a construction. All twenty-one are checked pairwise distinct by exhaustive
+not one small case propagated by a construction. All 74 are checked pairwise distinct by exhaustive
 canonicalisation over the full 7680-element NPN group, in pure Python with no solver involved.
 
 The closure holds eleven rather than six because both lift directions are counted: 6 + 6 with exactly
