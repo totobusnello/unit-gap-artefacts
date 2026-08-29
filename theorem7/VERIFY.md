@@ -194,7 +194,7 @@ drat-trim verify/sample_certs/n5_0x03de0154_opt_k3.cnf \
           verify/sample_certs/n5_0x03de0154_opt_k3.drat   # expect: s VERIFIED
 ```
 
-## Count the classes (F₅ ≥ 21)
+## Count the classes (F₅ ≥ 74)
 
 ```sh
 python3 verify/npn_check_f5.py
@@ -226,10 +226,15 @@ copies wearing a finished file's name.
 The counter this bundle ships supersedes an earlier one: it lifted only by AND and therefore reported 10.
 
 This script establishes **distinctness**, which is solver-free and therefore the cheapest part to
-trust. It does **not** establish that each of the fifteen is forced-multi; that comes per witness from
-the certificates, and as of 2026-08-12 **all four** non-lifts carry theirs on the no-SB path — see
-*What is claimed* above, and `manifest.csv`, which now pins a CNF hash for each of the four. A reader who
-accepts only plain DRAT gets `F₅ ≥ 15`.
+trust. It does **not** establish that each of the seventy-four is forced-multi; that comes per witness
+from the certificates. As of 2026-08-29 **sixty-nine** of the seventy-four carry a forced-multi chain
+of their own at `n = 5`, all on the no-SB path: the sixty-three classes of the `opt = 8` census, plus
+six lift classes that the census re-derived independently. The remaining five reach `n = 5` through the
+Lift theorem applied to a certified `n = 4` base — a proof, but a differently-shaped one. So a reader
+who accepts only plain DRAT gets `F₅ ≥ 69`, and the full `F₅ ≥ 74` needs the Lift theorem as well.
+Note what does *not* travel: the census chains are 25 GB and are regenerated from the CNF by the
+commands above rather than shipped: `manifest.csv` pins the hashes so a regenerated proof can be
+compared rather than trusted.
 
 ### The `path` column, and how to check it rather than believe it
 
