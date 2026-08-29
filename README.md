@@ -24,11 +24,14 @@ own closure, by a factor of nearly seven.
 Counting that closure one arity further gives `F₆ ≥ 145` and `F_n ≥ 145 · 2^{n−6}` for `n ≥ 6`,
 without deciding a single optimum at `n = 6`. All reproducible from scratch with `kissat` + `drat-trim`. Start at
 [`theorem7/VERIFY.md`](theorem7/VERIFY.md), which states the count **by trust path** rather than as a
-single number — and as of 2026-08-12 that split collapsed in the useful direction: every one of the
-74 holds without any symmetry-breaking argument, so there is no longer a smaller certified count
+single number — and as of 2026-08-12 that split collapsed in the useful direction: **`F₅ ≥ 74`**
+needs no symmetry-breaking argument at all, so there is no longer a smaller certified count
 sitting behind a lemma. **63 classes rest on `n = 5` DRAT alone** — any one of them is enough to refute the
 conjecture that the family is only its closure — and the remaining eleven add the Lift theorem, which is
-machine-checked. This sentence said "two classes" until 2026-08-29: it was true when written and stayed
+machine-checked. All sixty-three non-lifts carry a forced-multi DRAT certificate that `drat-trim`
+reports as `VERIFIED`; what the bundle pins is the subset whose proofs fit in a git repository, and
+the `opt = 8` census proofs — 25 GB of them — are too large to ship, so those are regenerated from the
+CNF by the commands in `theorem7/VERIFY.md` rather than shipped as blobs. This sentence said "two classes" until 2026-08-29: it was true when written and stayed
 true as a lower bound while the count grew, which is why it survived three revisions without being noticed.
 
 This paragraph said "a seventh, non-lift class" until 2026-08-11, then "at least fifteen" until

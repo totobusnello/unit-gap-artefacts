@@ -43,6 +43,9 @@ structural fact above.
 
 Usage: python3 npn_check_f5.py
 """
+import csv
+import os
+import sys
 from collections import defaultdict
 from itertools import permutations
 
@@ -131,6 +134,46 @@ for z in F4:
     objs[f"OR(0x{z:04x})"] = or_lift(z)
 objs.update(NONLIFTS)
 
+# ── O CENSO EXAUSTIVO DO NÍVEL opt = 8 (claim 0087, 2026-08-29) ────────────────────────────────────
+# As 53 classes novas NÃO estão transcritas aqui: são lidas do artefato do censo,
+# `exp_gap1_exact/k8_forced_multi_certificado.csv`, uma linha por classe com os shas do certificado
+# DRAT da perna forced-multi. O censo enumerou os 2 274 080 candidatos de `opt = 8`, achou 193 440
+# testemunhas forced-multi e fechou-as em 63 classes NPN — dez já conhecidas (entram como `controle`
+# e são absorvidas pela deduplicação abaixo, não recontadas) e 53 novas. Ler o artefato em vez de
+# copiar a lista é o que impede este contador de divergir do que foi certificado: se o CSV do censo
+# mudar, o número aqui muda com ele. Antes deste bloco o script reescrevia `f5_classes.csv` com as
+# 22 funções antigas, apagando o censo a cada execução — foi o gate do `export_public.sh` que pegou.
+_AQUI = os.path.dirname(os.path.abspath(__file__))
+# Dois layouts: a árvore privada (o censo mora no experimento vizinho) e o bundle público, que é
+# achatado — lá o CSV viaja ao lado deste script. Procurar nos dois é o que faz o mesmo contador
+# rodar nas duas árvores; sem isto o bundle exporta um script que não abre o seu próprio insumo.
+_CENSO = next((c for c in (
+    os.path.join(_AQUI, os.pardir, "exp_gap1_exact", "k8_forced_multi_certificado.csv"),
+    os.path.join(_AQUI, "k8_forced_multi_certificado.csv"),
+) if os.path.exists(c)), None)
+if _CENSO is None:
+    sys.exit("ERRO: k8_forced_multi_certificado.csv ausente — o censo opt=8 é insumo, não opcional")
+_ja = {npn_canon(v) for v in objs.values()}
+_novas = []
+with open(_CENSO, newline="") as _fh:
+    for _r in csv.DictReader(_fh):
+        if _r["veredicto"] != "CERTIFICADO":
+            continue
+        _c = int(_r["npn_canon"], 16)
+        # gate de convenção: a canônica do censo tem de ser ponto fixo do npn_canon deste script,
+        # senão os dois estão a usar grupos diferentes e a contagem é incomparável.
+        if npn_canon(_c) != _c:
+            sys.exit(f"ERRO: o censo dá 0x{_c:08x} como canônica, mas npn_canon devolve "
+                     f"0x{npn_canon(_c):08x} — convenções de grupo divergem")
+        if _c in _ja:
+            continue
+        _ja.add(_c)
+        _novas.append(_c)
+        objs[f"0x{_c:08x}"] = _c
+        NONLIFTS[f"0x{_c:08x}"] = _c
+print(f"censo opt=8: {len(_novas)} classes novas de {os.path.relpath(_CENSO)} "
+      f"(as demais CERTIFICADO já constavam)\n")
+
 canon = {k: npn_canon(v) for k, v in objs.items()}
 groups = defaultdict(list)
 for k, v in canon.items():
@@ -175,8 +218,6 @@ print("Krinkin's letter says 14 = 11 lifts + the 3 non-lifts he had; the fourth 
 # in the workspace lessons. The CSV below is the artefact; one row per object, with its canonical form,
 # so a reader can recount the classes with `cut`/`sort -u` and never take the summary line on trust.
 # Written unconditionally at the end (the E37 discipline: no incremental-only write).
-import os  # noqa: E402
-import sys  # noqa: E402
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from artifact_io import ArtefactIncomplete, fail, write_csv_atomic  # noqa: E402

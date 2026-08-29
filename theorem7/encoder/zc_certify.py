@@ -24,6 +24,7 @@ Remaining confidence gaps: encoder→CNF (G3) + drat-trim — the same as claims
 """
 import sys
 import os
+import shutil
 import subprocess
 import hashlib
 import json
@@ -52,7 +53,45 @@ def write_cnf(nvars, clauses, path):
             f.write(" ".join(map(str, cl)) + " 0\n")
 
 
+class SolverMissing(RuntimeError):
+    """O binário exigido não está instalado. É EXCEÇÃO, e não valor de retorno, de propósito.
+
+    `kissat()` devolve um rc e `drat_verify()` devolve um bool, e ambos os tipos já têm significado
+    substantivo: rc=20 é UNSAT, `False` é «drat-trim disse NOT VERIFIED». Degradar ferramenta ausente
+    para um desses valores publica uma ausência de infraestrutura como veredicto matemático — foi
+    assim que o bug do `\r` quase me fez concluir que 16 pernas de certificado estavam quebradas,
+    quando o que estava quebrado era o meu grep. Quem chama trata isto como exit 3 (recusou agir),
+    nunca 1 (a cadeia não fecha) nem 2 (contradição)."""
+
+
+def _instala_excepthook():
+    """Converte SolverMissing NÃO capturada em mensagem limpa + exit 3, para QUALQUER consumidor.
+
+    Existe porque 19 scripts importam este módulo e só dois têm try/except próprio. A alternativa era
+    editar 17 arquivos sem teste vivo em nenhum — criar dívida para pagar dívida. Encadeia no hook
+    anterior: qualquer outra exceção continua a imprimir traceback normal.
+    """
+    anterior = sys.excepthook
+
+    def _hook(tipo, valor, tb):
+        if issubclass(tipo, SolverMissing):
+            print(f"  RECUSA: {valor}", flush=True)
+            raise SystemExit(3)
+        anterior(tipo, valor, tb)
+
+    sys.excepthook = _hook
+
+
+_instala_excepthook()
+
+
+def _exige(bin_):
+    if shutil.which(bin_) is None:
+        raise SolverMissing(f"{bin_} não está instalado — nada foi executado, logo não há veredicto")
+
+
 def kissat(cnf, drat=None):
+    _exige("kissat")
     args = ["kissat", "-q", cnf] + ([drat] if drat else [])
     p = subprocess.run(args, capture_output=True, text=True)
     model = []
@@ -72,6 +111,7 @@ def drat_verify(cnf, drat):
     False), which is why the seven opt legs it validated are sound. Exit code added for parity with
     check_drat.sh: a checker that dies after printing the status line should not count as evidence.
     """
+    _exige("drat-trim")
     v = subprocess.run(["drat-trim", cnf, drat], capture_output=True, text=True)
     return "s VERIFIED" in v.stdout and v.returncode == 0
 

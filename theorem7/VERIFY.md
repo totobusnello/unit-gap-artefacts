@@ -20,7 +20,7 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
   every n ≥ 4. Corroborated by DRAT at n = 4, 5, 6.
 - **Density**: at n = 5 the family exceeds its own lift closure — witness `f = 0x03de ∧ (¬x₀ ∨ x₄)`
   (`0x03de0154`): non-canalizing, opt = 8, tree = 9 (gap = 1), forced-multi. Counting NPN classes,
-  n = 5 has **at least twenty-one** — **eleven** lift classes plus **ten non-lifts** — all checked
+  n = 5 has **at least 74** (`F₅ ≥ 74`) — **eleven** lift classes plus **63 non-lifts** — all checked
   pairwise distinct by exhaustive canonicalisation over the full NPN group, in pure Python with no
   solver. So the family is a genuine object, not one small case propagated by a construction.
   *Corrected 2026-08-11:* this said "at least ten" because the counting script generated only the
@@ -48,7 +48,7 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
   at-most-one-shared query was re-run for both with the ordering switched off and both closed — UNSAT in
   214 s and 180 s, `drat-trim` `s VERIFIED`, CNFs `39d9bd8db8daeb8b` and `378fa46181ed496b` now pinned.
   Therefore:
-  - **all twenty-one classes need no symmetry-breaking argument** — the eleven lift classes (by the Lift
+  - **all 74 classes need no symmetry-breaking argument** — the eleven lift classes (by the Lift
     Theorem, from the no-SB-certified n = 4 base) plus **all six** pinned non-lifts; the fifth and sixth
     were certified on 2026-08-14 by the systematic `beside` sweep, UNSAT at k = 9 with `s VERIFIED`;
   - **nothing in this bundle rests on the soundness of `gate_order_b`.** The earlier split between

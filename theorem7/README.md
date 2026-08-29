@@ -30,14 +30,16 @@ to `z`. The counter asserts that explanation class by class. An earlier version 
 least ten": the count was low because the counting script generated only the AND-lifts, which Kirill
 Krinkin spotted on 2026-08-11 while checking these artefacts without running a solver.
 
-**All ten non-lifts carry a forced-multi certificate produced with no symmetry breaking at all**, and
-their CNF hashes are pinned in the manifest. Two of them were, until 2026-08-12, certified only through
-a proved WLOG gate-ordering; re-running their at-most-one-shared query with the ordering switched off
-closed both — UNSAT in 214 s and 180 s, `drat-trim` `s VERIFIED`. So **`F₅ ≥ 21` needs no
-symmetry-breaking argument**, and the earlier split between `F₅ ≥ 13` certified and `F₅ ≥ 15` with the
-lemma is retired. Nothing in this bundle rests on that ordering. The headline never depended on it
-anyway: refuting "the family is only its lift closure" needs one non-canalizing witness, and there are
-ten.
+**All sixty-three non-lifts carry a forced-multi certificate produced with no symmetry breaking at
+all**, and their CNF hashes are pinned in the manifest. Two of them were, until 2026-08-12, certified
+only through a proved WLOG gate-ordering; re-running their at-most-one-shared query with the ordering
+switched off closed both — UNSAT in 214 s and 180 s, `drat-trim` `s VERIFIED`. So **`F₅ ≥ 74` needs no
+symmetry-breaking argument**, and the earlier split between certified and lemma-assisted counts is
+retired. Nothing in this bundle rests on that ordering. What the bundle pins is the subset of chains
+that fit in a git repository; the `opt = 8` census proofs are 25 GB and too large to ship, so those are
+regenerated from the CNF by the commands in `VERIFY.md` rather than shipped as blobs. The headline
+never depended on any of it anyway: refuting "the family is only its lift closure" needs one
+non-canalizing witness, and there are sixty-three.
 
 Four of those ten are the cheapest members known, and they came from settling a question the earlier
 counts left open: how few gates can such a function have? An edge-counting argument bounds it below —
@@ -66,11 +68,14 @@ witness with an inert fifth variable and you get `0x03de03de`, forced-multi with
 certified on the same chain (`verify/sample_certs/n5_0x03de03de_opt_k1..4`). That function is the n = 4
 phenomenon in five-variable clothing, which is what the qualifier is there to exclude.
 
-Two things that scan does *not* establish, and the distinction matters. `F₅ ≥ 21` rests on the four
+Two things that scan does *not* establish, and the distinction matters. `F₅ ≥ 74` rests on the
 certificates alone — the enumeration is how they were found, not why they hold. And the claim that level
-7 holds *exactly* six classes is the one part resting on the enumeration being complete; the bound and
-the minimality do not. None of the four is balanced, so none can be NP-self-complementary, and the
-count of such classes at `n = 5` stays at zero.
+7 holds *exactly* six classes, like the claim that level 8 holds *exactly* sixty-three, is the part
+resting on the enumeration being complete; the bound and the minimality do not. None of the four
+`opt = 7` classes is balanced, so none can be NP-self-complementary — but the `opt = 8` census found
+three that are, so the count of such classes at `n = 5` is now `s₅ ≥ 3`, not zero. Their two lifts
+collide, which is Theorem A.5 read backwards, and it is why the closure of the seventy-four seeds at
+`n = 6` is 145 classes and not 148.
 
 The fifth and sixth arrived on 2026-08-14, from applying the construction behind three of the first four
 to **every** n = 4 seed instead of the one it was aimed at: eighteen constructions, each decided in two

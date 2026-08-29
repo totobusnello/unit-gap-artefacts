@@ -108,6 +108,12 @@ def cnf_of(enc, path):
     write_cnf(enc.nvars, enc.clauses, path)
 
 
+
+def enc_decode_tree(encw, mw):
+    """Decodifica o modelo da testemunha de `tree`. Existe como funcao nomeada para que a
+    simetria com a perna de `opt` (que chama enc.decode(model)) fique visivel na leitura."""
+    return encw.decode(mw)
+
 def main():
     tt = int(sys.argv[1], 0)
     opt = int(sys.argv[2])
@@ -127,7 +133,11 @@ def main():
         drat = os.path.join(CERTS, f"n5_{tt:#010x}_opt_k{kk}.drat")
         rc, _ = kissat(cnf, drat)
         if rc == 10:
-            print(f"  !!! opt-LB k={kk} SAT — opt<{opt}. ABORT."); return 1
+            print(f"  !!! opt-LB k={kk} SAT — opt<{opt}. ABORT.")
+            # 2 = contradicao da premissa, nao 1 (=a cadeia nao fecha). O solver REFUTOU o opt
+            # passado na linha de comando; devolver 1 aqui punha uma refutacao na mesma gaveta
+            # que uma perna que faltou verificar. Alinhado com cert_chain.py.
+            return 2
         ver = drat_verify(cnf, drat); ok_lb = ok_lb and ver
         print(f"  opt-LB k={kk}: UNSAT drat-trim={'VERIFIED' if ver else 'FAIL'}")
 
@@ -136,7 +146,8 @@ def main():
     cnf = os.path.join(CERTS, f"n5_{tt:#010x}_opt_k{opt}.cnf"); cnf_of(enc, cnf)
     rc, model = kissat(cnf)
     if rc != 10:
-        print(f"  !!! k={opt} not SAT — opt>{opt}. ABORT."); return 1
+        print(f"  !!! k={opt} not SAT — opt>{opt}. ABORT.")
+        return 2  # idem: nao existe circuito com k=opt, logo opt>opt. Contradicao, nao falha de cadeia.
     gates, op = enc.decode(model)
     vc = verify_circuit(N, tt, gates, op)
     print(f"  opt-UB k={opt}: SAT verify_circuit={vc}")
@@ -157,9 +168,27 @@ def main():
         encw = AIGEncoder(N, opt + 1, tt, formula=True).build()
         cnfw = os.path.join(CERTS, f"n5_{tt:#010x}_tree_k{opt+1}.cnf"); cnf_of(encw, cnfw)
         rcw, mw = kissat(cnfw)
-        tree_ok = ver and rcw == 10
+        # A perna de `tree` aceitava APENAS o codigo SAT (`rcw == 10`), sem decodificar o modelo,
+        # sem re-simular a tabela e sem contar fan-out -- assimetrica em relacao a testemunha de
+        # `opt` logo acima, que faz as tres coisas. Achado pelo codex no painel de 22-08 ([media]).
+        # `tree` e' numero PUBLICADO, e a re-simulacao existe justamente para apanhar bug de
+        # encoder: confiar na codificacao formula e' confiar no que se quer verificar. Logica
+        # portada do cert_chain.py:66-86, que ja fazia certo.
+        vcw = False; shared = []
+        if rcw == 10:
+            gw, ow = enc_decode_tree(encw, mw)
+            vcw = verify_circuit(N, tt, gw, ow)
+            # gate i (1-based) tem id N+i; entradas sao 1..N. fan-out por CONSUMIDOR distinto.
+            fanout = {}
+            for (a, _pa, b, _pb) in gw:
+                for operand in (a, b):
+                    if operand > N:
+                        fanout[operand] = fanout.get(operand, 0) + 1
+            shared = sorted(g for g, c in fanout.items() if c > 1)
+        tree_ok = ver and rcw == 10 and vcw and not shared
         print(f"  tree: formula UNSAT k={opt} (drat-trim={'VERIFIED' if ver else 'FAIL'}) + "
-              f"formula SAT k={opt+1} ({rcw==10}) => tree={opt+1}, gap=1: {tree_ok}")
+              f"formula SAT k={opt+1} ({rcw==10}, verify_circuit={vcw}, "
+              f"fanout>1 gates={len(shared)} (must be 0)) => tree={opt+1}, gap=1: {tree_ok}")
     else:
         print(f"  tree: formula k={opt} rc={rc} (SAT => tree<=opt => gap<=0, not gap=1)")
 
