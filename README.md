@@ -27,8 +27,9 @@ without deciding a single optimum at `n = 6`. All reproducible from scratch with
 single number — and as of 2026-08-12 that split collapsed in the useful direction: **`F₅ ≥ 74`**
 needs no symmetry-breaking argument at all, so there is no longer a smaller certified count
 sitting behind a lemma. **63 classes rest on `n = 5` DRAT alone** — any one of them is enough to refute the
-conjecture that the family is only its closure — and the remaining eleven add the Lift theorem, which is
-machine-checked. All sixty-three non-lifts carry a forced-multi DRAT certificate that `drat-trim`
+conjecture that the family is only its closure. Of the eleven lift classes, six also carry a chain of
+their own at `n = 5`, re-derived independently by the census; only five rest on the Lift theorem
+applied to a certified `n = 4` base, and that theorem is machine-checked. All sixty-three non-lifts carry a forced-multi DRAT certificate that `drat-trim`
 reports as `VERIFIED`; what the bundle pins is the subset whose proofs fit in a git repository, and
 the `opt = 8` census proofs — 25 GB of them — are too large to ship, so those are regenerated from the
 CNF by the commands in `theorem7/VERIFY.md` rather than shipped as blobs. This sentence said "two classes" until 2026-08-29: it was true when written and stayed
