@@ -228,13 +228,18 @@ The counter this bundle ships supersedes an earlier one: it lifted only by AND a
 This script establishes **distinctness**, which is solver-free and therefore the cheapest part to
 trust. It does **not** establish that each of the seventy-four is forced-multi; that comes per witness
 from the certificates. As of 2026-08-29 **sixty-nine** of the seventy-four carry a forced-multi chain
-of their own at `n = 5`, all on the no-SB path: the sixty-three classes of the `opt = 8` census, plus
-six lift classes that the census re-derived independently. The remaining five reach `n = 5` through the
-Lift theorem applied to a certified `n = 4` base — a proof, but a differently-shaped one. So a reader
-who accepts only plain DRAT gets `F₅ ≥ 69`, and the full `F₅ ≥ 74` needs the Lift theorem as well.
-Note what does *not* travel: the census chains are 25 GB and are regenerated from the CNF by the
-commands above rather than shipped: `manifest.csv` pins the hashes so a regenerated proof can be
-compared rather than trusted.
+of their own at `n = 5`, all on the no-SB path. The decomposition is worth writing out, because two
+different sets here have size 63. The `opt = 8` census is 63 classes, of which six are lift classes
+and 57 are non-lifts. The family has 63 non-lifts in total: those 57, plus six certified earlier —
+four at `opt = 7` and two at `opt = 9`. What carries an `n = 5` chain is the union: 63 non-lifts plus
+the six lift classes the census re-derived, hence **69**. The remaining five are lift classes that
+reach `n = 5` through the Lift theorem applied to a certified `n = 4` base — a proof, but a
+differently-shaped one. So a reader who accepts only plain DRAT gets `F₅ ≥ 69`, and the full
+`F₅ ≥ 74` needs the Lift theorem as well.
+Note what does *not* travel, and why. The census `.drat` files were **deleted** after `drat-trim`
+verified them and their SHA-256 was recorded: each regenerates from its CNF in roughly 200 s, so
+storing them bought nothing. `manifest.csv` pins the hashes, which is what makes a regenerated proof
+comparable rather than merely re-run.
 
 ### The `path` column, and how to check it rather than believe it
 

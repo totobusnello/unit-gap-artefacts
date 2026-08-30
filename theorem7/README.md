@@ -35,9 +35,10 @@ all**, and their CNF hashes are pinned in the manifest. Two of them were, until 
 only through a proved WLOG gate-ordering; re-running their at-most-one-shared query with the ordering
 switched off closed both — UNSAT in 214 s and 180 s, `drat-trim` `s VERIFIED`. So **`F₅ ≥ 74` needs no
 symmetry-breaking argument**, and the earlier split between certified and lemma-assisted counts is
-retired. Nothing in this bundle rests on that ordering. What the bundle pins is the subset of chains
-that fit in a git repository; the `opt = 8` census proofs are 25 GB and too large to ship, so those are
-regenerated from the CNF by the commands in `VERIFY.md` rather than shipped as blobs. The headline
+retired. Nothing in this bundle rests on that ordering. What the bundle pins is the subset of chains it still
+has: the `opt = 8` census proofs were deleted once `drat-trim` verified them and their SHA-256 was
+recorded, because each regenerates from its CNF in about 200 s. `VERIFY.md` carries the commands and
+`manifest.csv` the hashes. The headline
 never depended on any of it anyway: refuting "the family is only its lift closure" needs one
 non-canalizing witness, and there are sixty-three.
 

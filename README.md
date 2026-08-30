@@ -30,9 +30,10 @@ sitting behind a lemma. **63 classes rest on `n = 5` DRAT alone** — any one of
 conjecture that the family is only its closure. Of the eleven lift classes, six also carry a chain of
 their own at `n = 5`, re-derived independently by the census; only five rest on the Lift theorem
 applied to a certified `n = 4` base, and that theorem is machine-checked. All sixty-three non-lifts carry a forced-multi DRAT certificate that `drat-trim`
-reports as `VERIFIED`; what the bundle pins is the subset whose proofs fit in a git repository, and
-the `opt = 8` census proofs — 25 GB of them — are too large to ship, so those are regenerated from the
-CNF by the commands in `theorem7/VERIFY.md` rather than shipped as blobs. This sentence said "two classes" until 2026-08-29: it was true when written and stayed
+reports as `VERIFIED`. The census proofs are not in the bundle because they no longer exist anywhere:
+each was deleted once `drat-trim` had verified it and its SHA-256 was recorded, since regenerating one
+from its CNF costs about 200 s. `theorem7/VERIFY.md` carries the commands and `manifest.csv` the
+hashes, so a regenerated proof is comparable rather than merely re-run. This sentence said "two classes" until 2026-08-29: it was true when written and stayed
 true as a lower bound while the count grew, which is why it survived three revisions without being noticed.
 
 This paragraph said "a seventh, non-lift class" until 2026-08-11, then "at least fifteen" until
