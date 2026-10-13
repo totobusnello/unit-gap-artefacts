@@ -27,7 +27,7 @@ def build_amo_shared(tt, opt, gate_order_sb=False, gate_order_b=False, n=None, r
     """Base circuit encoder (k=opt) + at-most-one-shared. Sound direction: fan-out>=2 => z.
 
     `n=None` cai no global do MÓDULO, que é 5. Isso era uma armadilha silenciosa entre módulos, achada
-    por Codex REV-0100: `reproduce_witness.py` passou a definir seu próprio `N` por testemunha (para
+    pela revisão REV-0100: `reproduce_witness.py` passou a definir seu próprio `N` por testemunha (para
     servir a base n=4), mas mudar `reproduce_witness.N` não altera o `N` DESTE módulo — de modo que
     `reproduce_witness.py 0x03de --full` construiria uma instância de CINCO variáveis, rotulada `n4`, e
     o leg poderia dar PASS sobre o objeto errado. O `main` daqui já sobrescrevia via `globals()["N"]`
@@ -37,8 +37,8 @@ def build_amo_shared(tt, opt, gate_order_sb=False, gate_order_b=False, n=None, r
     gate_order_sb (default False = byte-identical to the vetted path):
     *** UNSOUND — DO NOT USE FOR CERTIFICATION. Kept only for the record. ***
     This adds a gate-ordering symmetry break (order NON-OUTPUT gates 1..k-1 by operand 4-tuple
-    (a,pa,b,pb) via adjacent-pair clauses, output gate exempt). It was CONJECTURED WLOG (Kimi
-    REV-0082) and wrongly confirmed by Grok REV-0083, but Codex REV-0085 found a concrete
+    (a,pa,b,pb) via adjacent-pair clauses, output gate exempt). It was CONJECTURED WLOG (review
+    REV-0082) and wrongly confirmed by review REV-0083, but review REV-0085 found a concrete
     counterexample (tt=0x80008000: an optimal fan-out-1 circuit g1=x2&x3 (2,0,3,0) -> g2=x1&g1
     (1,0,6,0) whose topology forces a DECREASING tuple, so the SB forbids a valid circuit). Lex
     order on `a` is incompatible with the topological constraint (a just-placed node enters the
@@ -62,11 +62,11 @@ def build_amo_shared(tt, opt, gate_order_sb=False, gate_order_b=False, n=None, r
                     if (a2, pa2, b2, pb2) < ti:   # tuple(i) > tuple(i+1): forbid this pairing
                         clauses.append([-s, -s2])
     if gate_order_b:
-        # REPAIR candidate (Codex REV-0085 diagnosis): order NON-OUTPUT gates by the LARGER
+        # REPAIR candidate (REV-0085 diagnosis): order NON-OUTPUT gates by the LARGER
         # operand b FIRST (key = (b,a,pa,pb)) instead of by a. Rationale: a gate that becomes
         # available only after some node j is placed uses j as its larger operand b, so b tracks
         # topological depth => ordering by non-decreasing b is compatible with the topological
-        # constraint (unlike ordering by a). This ADMITS Codex's counterexample circuit. Whether
+        # constraint (unlike ordering by a). This ADMITS the REV-0085 counterexample circuit. Whether
         # it is truly WLOG is UNDER PANEL REVIEW — do NOT rely on a verdict from it until an
         # independent family proves it sound. Output gate k exempt.
         for i in range(1, k - 1):
@@ -152,7 +152,7 @@ def main():
     vc = verify_circuit(N, tt, gates, op)
     print(f"  opt-UB k={opt}: SAT verify_circuit={vc}")
     if not vc:
-        # REV-0004 exists precisely so a False here cannot slide by as printed text (Kimi
+        # REV-0004 exists precisely so a False here cannot slide by as printed text (review
         # REV-0097 finding 6a: verify_circuit results were reported, never asserted).
         print(f"  !!! witness does not compute tt — k={opt} leg NOT established. ABORT.")
         return 1
@@ -170,7 +170,7 @@ def main():
         rcw, mw = kissat(cnfw)
         # A perna de `tree` aceitava APENAS o codigo SAT (`rcw == 10`), sem decodificar o modelo,
         # sem re-simular a tabela e sem contar fan-out -- assimetrica em relacao a testemunha de
-        # `opt` logo acima, que faz as tres coisas. Achado pelo codex no painel de 22-08 ([media]).
+        # `opt` logo acima, que faz as tres coisas. Achado no painel de revisão de 22-08 ([media]).
         # `tree` e' numero PUBLICADO, e a re-simulacao existe justamente para apanhar bug de
         # encoder: confiar na codificacao formula e' confiar no que se quer verificar. Logica
         # portada do cert_chain.py:66-86, que ja fazia certo.

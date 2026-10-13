@@ -96,7 +96,7 @@ class AIGEncoder:
           'aeqb'  permite a == b  (AND(x,x)=x buffer; AND(x,~x)=0 constante)
           'const' admite 0 e 1 como operandos (o §2.1 admite constante livre; o encoder não)
           'order' admite (a,b) E (b,a) — relaxa a ORDENAÇÃO `a < b`, que é simetria por comutatividade
-                  do AND. ATENÇÃO: `aeqb` sozinho NÃO relaxa a ordenação (Kimi REV-0113) —
+                  do AND. ATENÇÃO: `aeqb` sozinho NÃO relaxa a ordenação (revisão REV-0113) —
                   `combinations_with_replacement` devolve pares ordenados, só admitindo a==b
 
         Os outros dois — toda porta alimenta uma posterior, e a saída é a porta k — NÃO são relaxáveis:
@@ -122,7 +122,7 @@ class AIGEncoder:
             if "const" in self.relax:
                 nodes = [self.CONST_NODE] + nodes   # 0/1 via polaridade sobre uma fonte constante
             # 'order' relaxa a ORDENAÇÃO de operandos (`a < b`), que é simetria por comutatividade do
-            # AND. Kimi REV-0113 pegou que `combinations_with_replacement` ainda devolve pares
+            # AND. A revisão REV-0113 pegou que `combinations_with_replacement` ainda devolve pares
             # ORDENADOS: ela relaxa `a != b`, não `a < b`. Sem `order`, a ordenação seguia em vigor e a
             # contagem "três dos cinco relaxados" era falsa — dois dos cinco, mais o sexto silencioso.
             if "order" in self.relax:

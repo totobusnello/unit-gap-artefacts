@@ -88,7 +88,7 @@ awk -F, 'NR>1 && $6==1 && $7 ~ /\+sb/' atlas_n4.csv | wc -l
   **one** non-canalizing forced-multi gap-1 function to fall, and `0x03de0154` is one whose forcedness
   is pinned without any ordering argument. The headline — *the family exceeds its own closure* — sits
   entirely on the no-SB path. An earlier version of this file said "at least ten" without any split;
-  the correction is dated 2026-08-11 and came from an adversarial audit (Codex REV-0107). A second
+  the correction is dated 2026-08-11 and came from an adversarial audit (review REV-0107). A second
   correction, dated 2026-08-12, retires the split itself: all four non-lifts are now certified without
   the ordering.
 
@@ -369,6 +369,6 @@ and the upper bound is the `k = opt + 1` formula witness pinned in `verify/tree_
 against the truth table with per-gate fan-out recounted. Both halves ship for all four `n = 5` witnesses.
 So `tree` and forcedness are two independent certificates rather than one implying the other, and this
 paragraph's argument is a fallback, not the load-bearing step. *The contradiction of presenting both as
-current was found by Codex on 2026-08-12: the corrected version was written near the top of this file and
+current was found by an adversarial review on 2026-08-12: the corrected version was written near the top of this file and
 this passage was left as it stood — the same failure-to-propagate the file's own numbers gate exists to
 catch.*

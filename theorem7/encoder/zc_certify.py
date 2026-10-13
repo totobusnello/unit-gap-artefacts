@@ -106,7 +106,7 @@ def drat_verify(cnf, drat):
     """True iff drat-trim actually verified the proof. See tools/check_drat.sh for the shell twin.
 
     The `s ` prefix is load-bearing and must stay: `"VERIFIED" in stdout` — which decide_pending.py
-    used until Codex REV-0096 reproduced the failure — is also true of `s NOT VERIFIED`, so it
+    used until review REV-0096 reproduced the failure — is also true of `s NOT VERIFIED`, so it
     passes a FAILED proof. This function was never affected (`"s VERIFIED" in "s NOT VERIFIED"` is
     False), which is why the seven opt legs it validated are sound. Exit code added for parity with
     check_drat.sh: a checker that dies after printing the status line should not count as evidence.

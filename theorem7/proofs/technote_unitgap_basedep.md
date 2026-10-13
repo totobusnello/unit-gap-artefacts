@@ -1,24 +1,11 @@
 # The "Unit Gap" Is Base-Dependent: A Mechanically Verified Refutation and a Three-Base Census at n ≤ 4
 
-<!-- snapshot-stamp -->
-> **Snapshot de 2026-07-26.** Esta é uma nota de trabalho: os números aqui são o estado do
-> artefato NAQUELE dia e **não** são reconferidos por gate. O valor corrente de qualquer
-> contagem vive no CSV que a produziu (`experiments/ [private tree]`), lido por
-> `bash tools/numbers.sh`; o estágio do projeto vive em [`STATUS.md`](../../STATUS.md). Divergência entre esta nota e o artefato resolve-se **a favor do artefato**.
-
-**Status interno:** DRAFT v1 (2026-07-13). Consolida claims 7P-PNP-CLM-0024..0029 (ledger), a
-formalização Lean (`../formal/UnitGap.lean`) e os censos das 3 bases (`../experiments/npn4_bases.csv`).
-Revisão adversarial da refutação: 4 famílias (REV-0009..0012); do censo AIG: 2 famílias
-(REV-0013/0014). Este bloco e as referências internas saem de qualquer versão pública.
-Publicação/preprint SOMENTE com autorização de Luiz (10_PUBLICATION_RULES).
->
-> **Correção 2026-07-17 (pós REV-0015..0018 sobre a v0 do paper):** (i) as 3 classes de gap máximo 6
-> (§3) são NPN **DISTINTAS**, não "parity-4 and relatives" — parity é uma delas (opt_XAG 6/5/3, pesos
-> de Hamming 6/8/8); (ii) a definição verbatim de `s` (Cor 6) do Krinkin é `|D_a∩D_b|`=3, e o paper é
-> internamente inconsistente (§2 usa `opt` nos filhos vs §3 Bellman `(Tv)(f)=min(1+v(a)+v(b))`
-> recursivo); (iii) `tree(⊕₃)≥9` é `native_decide`, não kernel `decide`. Estas e as demais correções
-> (~20) vivem na **v1 do paper** (`../drafts/paper1_unitgap_basedep_v1.md`); esta technote é a base
-> histórica, não reescrita.
+> **Note (2026-10-13).** This is a working note from July 2026, kept as it was written. Three corrections
+> came later: (i) the three NPN classes with the maximum gap 6 at n = 4 are distinct classes, and parity
+> is one of them, not "parity-4 and relatives"; (ii) under Krinkin's verbatim definition in Corollary 6,
+> s = |D_a ∩ D_b| = 3, and Krinkin's paper uses opt in the children in §2 but the recursive form
+> (Tv)(f) = min(1 + v(a) + v(b)) in §3; (iii) tree(⊕₃) ≥ 9 is checked with `native_decide`, not with kernel
+> `decide`. The corrected account is the paper in `paper/`.
 
 ---
 
@@ -90,11 +77,11 @@ i.e., m ≥ n, for every non-tree optimal circuit).
 
 **Diagnostic signature.** In Table 1 of the paper (n = 3, complete), the two functions listed with
 gap = 1 at opt = 6 decode exactly to parity and its complement — which is what the displayed
-recursion (opt in the children) reports for them. Independently, GLM's review re-derived that of
+recursion (opt in the children) reports for them. Independently, review REV-0012 re-derived that of
 the 18 functions with opt = 6 at n = 3, sixteen have true formula cost 7 and exactly two have 9.
 
-**Verification chain.** Four independent model families (Grok/xAI, GPT-5.6/OpenAI, Kimi/Moonshot,
-GLM/Zhipu) adversarially reviewed the package and sustained it, several re-deriving the numbers
+**Verification chain.** Four adversarial reviews, each by a different model family,
+reviewed the package and sustained it, several re-deriving the numbers
 from scratch (REV-0009..0012). The counterexample is formalized in Lean 4.31.0 without Mathlib
 (`UnitGap.lean`): witnesses and the structural minimality lemma are kernel-checked (`decide`), the
 finite DP sweep uses one `native_decide`, and the axiom footprint is audited
@@ -195,6 +182,6 @@ and of the exact-synthesis pipeline used throughout this note.
 
 All artifacts (encoders, gate scripts, censuses, CNFs, DRAT proofs, Lean sources, review verbatims,
 call log) are versioned in the program repository. Analysis and code produced by an AI system
-(Claude, Anthropic) under the direction of Luiz Antonio Busnello; certificates checked by standard
+under the direction of Luiz Antonio Busnello; certificates checked by standard
 independent tools (kissat, drat-trim, Lean); mathematical claims adversarially cross-reviewed by
 four independent model families before external communication.

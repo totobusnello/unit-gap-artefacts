@@ -1,6 +1,6 @@
 # verification — rerun of the Krinkin catalogue's own `verify_all.py` with the two closed values
 
-- **Date:** 2026-07-11 · **Motivation:** REV-0007 (Codex) finding 4 — the numbers 987→995 cited in
+- **Date:** 2026-07-11 · **Motivation:** REV-0007 finding 4 — the numbers 987→995 cited in
   the technote and in the issue needed an archived artefact, not just a claim in prose.
 - **Procedure:** downloaded `krinkin/bounds` @ HEAD (`1443063`); applied a two-line binary patch to
   the CSV (`improved_ub` → `exact` on classes 0x1669/0x166b, line endings preserved); ran the

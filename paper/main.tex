@@ -208,7 +208,7 @@ under the \S3 reading, Theorem~2 is false.
   full $k = 1,\dots,5$ chain --- not only $k = 5$ --- certifies $\opt \ge 6$ under the normalized
   exact-size encoding. \emph{The value is also classical:} since the AIG basis is $U_2$ (\S\ref{sec:prelim}),
   Schnorr's theorem --- the $U_2$ circuit complexity of $\oplus_n$ is exactly
-  $3n-3$~\cite{schnorr1976}, an equality restated in~\cite{morizumi2015}\footnote{We cite the
+  $3n-3$~\cite{schnorr1974}, an equality restated in~\cite{morizumi2015}\footnote{We cite the
   1976 original for the result and a modern, openly accessible source for the statement of the
   equality; the original was not consulted directly.} --- gives $\opt(\oplus_3) = 6$ and $\opt(\oplus_4) = 9$ directly, in
   agreement with the values computed here.
@@ -239,7 +239,7 @@ under the \S3 reading, Theorem~2 is false.
   Together with the explicit six-gate circuit ($\opt \le 6$), $\gapop(\oplus_3) \ge 2$ follows
   \textbf{using only Khrapchenko and that circuit} --- independent of the tree DP and the DRAT
   chain. Substituting Schnorr's theorem for the explicit circuit removes even that:
-  $\opt(\oplus_3) = 6$~\cite{schnorr1976} and $\tree(\oplus_3) \ge 8$ (Khrapchenko) yield
+  $\opt(\oplus_3) = 6$~\cite{schnorr1974} and $\tree(\oplus_3) \ge 8$ (Khrapchenko) yield
   $\gapop(\oplus_3) \ge 2 > 1$ from two published classical results and the basis identification
   of \S\ref{sec:prelim}, with no computation of ours in the chain. \textbf{That alone contradicts
   Theorem~2.}
@@ -449,12 +449,12 @@ refereed literature (\S\ref{sec:refutation}); the value agrees with the exhausti
 of~\cite{cox2011} \\
 \addlinespace
 $\gapop(\oplus_4) = 6$ (exact, census maximum) &
-Fully citational: Schnorr~\cite{schnorr1976} for $\opt = 9$ and Tarui~\cite{tarui2010} for
+Fully citational: Schnorr~\cite{schnorr1974} for $\opt = 9$ and Tarui~\cite{tarui2010} for
 $\tree = 15$, since $4 = 2^2$ is where Khrapchenko's bound is attained \\
 \addlinespace
 $\opt(\oplus_3) = 6$, $\opt(\oplus_4) = 9$ (external agreement) &
 Classical: the AIG basis is $U_2$ and Schnorr's theorem gives the $U_2$ complexity of $\oplus_n$ as
-exactly $3n-3$~\cite{schnorr1976} --- an independent check of the encoder at two points \\
+exactly $3n-3$~\cite{schnorr1974} --- an independent check of the encoder at two points \\
 \addlinespace
 AIG gap census $n = 4$ &
 Two implementations of the tree recurrence agree on all 65{,}536 cells; the $\opt$ side is the
@@ -499,7 +499,7 @@ provenance, not part of the verification chain.
   $B_2$, tabulated for small $n$ by Knuth (TAOCP 7.1.2)~\cite{knuth-taocp4a}; our maximum of 7
   agrees. We claim \textbf{no novelty for the XAG numbers themselves}.
 
-  \item \textbf{Both sizes of parity are known, and neither is ours.} Schnorr~\cite{schnorr1976}
+  \item \textbf{Both sizes of parity are known, and neither is ours.} Schnorr~\cite{schnorr1974}
   determined the $U_2$ circuit complexity of $\oplus_n$ exactly, $3n-3$. On the formula side
   Khrapchenko's $n^2$ lower bound is classical and, for $n = 2^k$, attained~\cite{tarui2010}.
   Since the AIG basis with free inversions is $U_2$ (\S\ref{sec:prelim}), that fixes
@@ -514,7 +514,7 @@ provenance, not part of the verification chain.
   we did not find in the literature is the two placed side by side: the circuit bound and the
   formula bound come from different traditions --- gate elimination and Khrapchenko's measure ---
   and reading them together requires only the basis identification above. Khrapchenko's bound
-  dates from 1971 and Schnorr's from 1976, so the facts that contradict Theorem~2 were on the
+  dates from 1971 and Schnorr's from 1974, so the facts that contradict Theorem~2 were on the
   record for fifty years before it was stated; what was missing was a reason to subtract one
   from the other.
 

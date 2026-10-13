@@ -1,5 +1,5 @@
 """Completes the DRAT chain for the child h=(x1⊕x2)∧¬x3 (opt=4): generates UNSAT DRAT at k=1,2
-(k=3 already exists as h_child_k3). Closes finding REV-0017-r2/Codex I2: in the
+(k=3 already exists as h_child_k3). Closes finding REV-0017-r2/I2: in the
 exact-size, opt(h)≥4 requires UNSAT at k=1,2,3, not only k=3.
 """
 import sys, subprocess, os, hashlib

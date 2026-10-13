@@ -8,8 +8,8 @@
 
 > **Claim `7P-PNP-CLM-0033`** (FINITE_SCOPE_VERIFIED, n=4, 2026-08-06). Short note, citable
 > alongside the v4 withdrawal of arXiv:2603.08033. Follows the LASTRO standard
-> (`../13_WRITEUP_STANDARD.md`). Reviewed by the pre-communication gate (Codex REV-0060 +
-> Kimi REV-0061, 2026-08-06): GO after the precision fixes incorporated here.
+> (`../13_WRITEUP_STANDARD.md`). Reviewed by the pre-communication gate (REV-0060 +
+> REV-0061, 2026-08-06): GO after the precision fixes incorporated here.
 
 ## The statement
 
@@ -99,7 +99,7 @@ decomposition: exactly one gate g is shared between the two child sub-DAGs"* —
 - **Lean formalization (n=4):** `formal/ThresholdTreeN4.lean` certifies Krinkin's Theorems 3 and
   4 (the surviving ones) by `native_decide` — not this result, but the same scope.
 - **Adversarial panel — 4 families, ALL SUSTAINED** (REV-0056..0059) + **pre-communication gate**
-  (REV-0060 Codex, REV-0061 Kimi): GO after fixes. Human review: Luiz Antonio Busnello.
+  (REV-0060, REV-0061): GO after fixes. Human review: Luiz Antonio Busnello.
 
 ## Caveats (declared)
 
@@ -112,7 +112,7 @@ decomposition: exactly one gate g is shared between the two child sub-DAGs"* —
 2. **`gap = 1` (tree side):** for the flagship **`0x03de` it is DRAT-certified** (tree=7 via the
    formula encoder, above) — independent of the census. For the other witnesses, the tree side
    still rests on the dual-DP census (0026) + an independent Bellman DP re-derived in the panel
-   (REV-0058/GLM).
+   (REV-0058).
 3. **The 31 "mixed" classes were not enumerated exhaustively** (short-circuit upon finding both a
    conforming and a violating optimum); the *existence* of a violator in them is solid, but their
    counts are prefixes. The **26 pure** classes (6 zero-conforming + 20 all-conforming) **were**

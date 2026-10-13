@@ -71,7 +71,7 @@ Two things are worth separating here, because they have different standing.
 
 **What refutes Theorem 2 is classical, and no certificate in this repository is needed for it.**
 The AIG basis with free inversions is exactly `U₂` — the full binary basis minus XOR and XNOR — so
-Schnorr (1976) gives `opt(⊕₃) = 6`, and Khrapchenko's bound forces `tree(⊕₃) ≥ 9` leaves, hence
+Schnorr (1974) gives `opt(⊕₃) = 6`, and Khrapchenko's bound forces `tree(⊕₃) ≥ 9` leaves, hence
 `≥ 8` gates. **That already gives `gap ≥ 2 > 1`**, from two published results and one
 identification, with no computation of ours in the chain. The identification is elementary, but it
 is a step, and it is supplied by the accompanying note rather than by Schnorr or Khrapchenko.

@@ -279,7 +279,7 @@ pinned by a counterexample rather than left as a remark.
 **`lift_lemma` has no `sorry`.** The Lift Lemma is machine-checked under exactly the hypotheses stated
 here, in the formalisation's model.
 
-*Scope, stated because an earlier version of this note overstated it (Codex review, 2026-08-20).* As of
+*Scope, stated because an earlier version of this note overstated it (adversarial review, 2026-08-20).* As of
 2026-08-20 what was machine-checked was the **`∧` case**, and two steps remained paper proofs: §7 below
 (the `∨` case) and the convention bridge.
 

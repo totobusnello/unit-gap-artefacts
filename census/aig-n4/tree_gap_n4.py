@@ -81,7 +81,7 @@ assert (cost[alltt] == cost[alltt ^ MASK]).all(), "tree did not close under comp
 
 # --- join with the opt catalogue ---
 rows = list(csv.DictReader(open(CAT)))
-# REV-0013 (Codex): the join must require a 100% exact catalogue, not consume
+# REV-0013: the join must require a 100% exact catalogue, not consume
 # improved_ub silently (0x1669/0x166b carried stale metadata in the CSV, since
 # corrected — the k=9 DRAT proofs of claims 0022/0023 establish opt=10 exactly)
 nonexact = [r["npn_rep_hex"] for r in rows if r["status"] != "exact"]

@@ -1,5 +1,5 @@
 """Generates UNSAT DRAT proofs for parity-3 in the AIG encoder at k=1,2,3,4, completing the
-chain opt(par3) >= 6 (the par3_k5 certificate already exists). Closes finding C1/REV-0017 (Codex):
+chain opt(par3) >= 6 (the par3_k5 certificate already exists). Closes finding C1/REV-0017:
 the encoder is normalized exact-size (not "at most k"), so opt>=6 requires UNSAT
 at EVERY k=1..5, not only k=5.
 

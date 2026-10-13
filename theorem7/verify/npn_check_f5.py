@@ -212,7 +212,7 @@ print(f"\n*** F5 >= {total}  ({len(lift_c)} lifts + {len(nl_c)} non-lifts) — "
 print("Krinkin's letter says 14 = 11 lifts + the 3 non-lifts he had; the fourth was promoted after it.")
 
 # ── THE RESULT AS A COMMITTED ARTEFACT, not a print ────────────────────────────────────────────────
-# Codex REV-0109 blocked on this and was right: the project's own rule is that a number in a claim
+# Review REV-0109 blocked on this and was right: the project's own rule is that a number in a claim
 # traces to a committed artefact, and until now `F5 >= 15` traced to this script's stdout plus the
 # answer restated in its own docstring. A script that prints is not an artefact — that exact phrase is
 # in the workspace lessons. The CSV below is the artefact; one row per object, with its canonical form,

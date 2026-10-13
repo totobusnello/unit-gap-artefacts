@@ -53,7 +53,7 @@ from zc_certify import write_cnf, kissat, drat_verify, sha16 # noqa: E402
 # no-SB CNF existed to pin. That was honest then and became a lie the moment the certificates landed —
 # the manifest pinned the two new hashes and named THIS script as their regenerator while the table
 # below still said the hashes did not exist and the code below forced `match = True` without comparing.
-# Three independent reviewers found it in the same hour (Codex REV-0114, DeepSeek REV-0115, Kimi
+# Three independent reviewers found it in the same hour (REV-0114, REV-0115,
 # REV-0116), which is what a broken promise in the one file strangers execute deserves.
 #
 # So: `forced_cnf_sha16: None` is no longer a state any n=5 witness is allowed to be in. If a witness
@@ -73,7 +73,7 @@ WITNESSES = {
                  "desc": "10th class — found by random census, not by construction"},
 }
 DEFAULT_TT = 0x03DE0154
-# `_generated/`, NOT `sample_certs/`. Codex asked for exactly this in REV-0094 ("reproduce sobrescreve
+# `_generated/`, NOT `sample_certs/`. Review REV-0094 asked for exactly this ("reproduce sobrescreve
 # sample_certs") and the call log records it as applied — but the line was never changed, and the drift
 # between the ledger and the code stayed invisible until the cost showed up as 535 MB of untracked
 # files sitting in the versioned tree, one DRAT of them 443 MB. A regenerator must never write into
@@ -142,7 +142,7 @@ def leg_tree():
 
     # FAN-OUT CONTADO POR PORTA, e não confiado ao `formula=True` do encoder. O VERIFY.md afirmava
     # "per-gate fan-out is counted" e o manifest repetia a afirmação, mas este leg só chamava
-    # `verify_circuit`, que compara a truth table e nada diz sobre estrutura (Codex REV-0100). Uma
+    # `verify_circuit`, que compara a truth table e nada diz sobre estrutura (revisão REV-0100). Uma
     # regressão no modo `formula` passaria como "árvore self-certifying" sem que nada checasse a
     # propriedade que dá o nome ao leg. Agora a asserção existe: numa fórmula, todo nó interno é
     # consumido no máximo uma vez, contando a saída como consumidor.
@@ -158,7 +158,7 @@ def leg_tree():
     # comentário afirmava "contando a saída como consumidor". Erro achado ao ler o `decode()` antes de
     # os revisores o fazerem. Na prática o veredicto não muda (a última porta não pode ser operando de
     # ninguém, logo tem 0 consumidores internos), mas um comentário que descreve o que o código NÃO faz
-    # é a mesma falha que o Codex apontou no leg inteiro — afirmar mais do que se executa.
+    # é a mesma falha que a revisão apontou no leg inteiro — afirmar mais do que se executa.
     out_node = N + len(gates)
     consumers[out_node] = consumers.get(out_node, 0) + 1
     max_fanout = max(consumers.values()) if consumers else 0
@@ -178,7 +178,7 @@ def leg_tree_chain():
     Esta perna existe porque o `manifest.csv` pina `b922fe75b9c3508e` para ela e nomeava, até
     2026-08-12, um script PRIVADO como regenerador — promessa que um leitor externo não podia cumprir.
     Depois eu a troquei por uma DESCRIÇÃO (`aig_exact.py (AIGEncoder(...) for k=1..8)`), que também não
-    se cola num shell. DeepSeek REV-0115 pegou as duas formas. Um comando que existe é a única correção.
+    se cola num shell. A revisão REV-0115 pegou as duas formas. Um comando que existe é a única correção.
 
     Compara o SHA de cada k contra `tree_chain_n5.csv` quando esse artefato viaja no bundle; quando não
     viaja, ainda imprime os SHAs para conferência manual, e diz qual é o caso — em vez de calar.
@@ -191,7 +191,7 @@ def leg_tree_chain():
     ref = {}
     # POR TESTEMUNHA. A v1 procurava só `tree_chain_n5.csv`, que é o CSV do FLAGSHIP — para as outras três
     # o filtro por `tt_hex` não casava nada, `ref` ficava vazio e a comparação por perna passava sem
-    # comparar. Achado pelo Codex em 2026-08-12, junto com a lacuna do upper bound. Nome específico
+    # comparar. Achado por revisão em 2026-08-12, junto com a lacuna do upper bound. Nome específico
     # primeiro, legado depois, porque o flagship é o único que usa o nome sem sufixo.
     cands = [os.path.join(HERE, f"tree_chain_n5_{TT:#010x}.csv"),
              os.path.join(HERE, "tree_chain_n5.csv")]
@@ -246,7 +246,7 @@ def leg_canalizing():
 def leg_forced():
     print(f"\n[forced-multi] amo-shared UNSAT at k={OPT}, ZERO symmetry break (247 MB DRAT, ~minutes)")
     # `n=N` EXPLÍCITO: sem isto, `build_amo_shared` usa o `N=5` do módulo n5_forced_test e a base n=4
-    # seria certificada como instância de cinco variáveis, com o arquivo rotulado `n4` (Codex REV-0100).
+    # seria certificada como instância de cinco variáveis, com o arquivo rotulado `n4` (revisão REV-0100).
     nv, cl = build_amo_shared(TT, OPT, gate_order_b=False, n=N)
     cnf = os.path.join(OUT, f"n{N}_{TT:#010x}_amo1shared_nosb.cnf"); write_cnf(nv, cl, cnf)
     csha = sha16(cnf)
