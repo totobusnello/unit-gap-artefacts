@@ -1,5 +1,6 @@
 # Closing the Last Two Unresolved Entries of the NPN-4 Exact AIG Size Catalog: opt(0x1669) = opt(0x166b) = 10
 
+
 ---
 
 ## Abstract

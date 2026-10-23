@@ -44,6 +44,7 @@ structural fact above.
 Usage: python3 npn_check_f5.py
 """
 import csv
+import glob
 import os
 import sys
 from collections import defaultdict
@@ -173,6 +174,44 @@ with open(_CENSO, newline="") as _fh:
         NONLIFTS[f"0x{_c:08x}"] = _c
 print(f"censo opt=8: {len(_novas)} classes novas de {os.path.relpath(_CENSO)} "
       f"(as demais CERTIFICADO já constavam)\n")
+
+# ── SEGUNDA FONTE AUTOMÁTICA: as fatias de nível (L7/item 50) ─────────────────────────────────────
+# 2026-10-23 (L53, autorizada pelo Luiz: «L53 - faz»). O censo acima varre `opt = 8` inteiro; acima
+# disso não há exaustão, e a L7 decidiu colher por FATIA, com teto escrito por classe. A fatia do
+# nível 9 entregou quatro classes com as MESMAS três condições que sustentam o claim `0087` —
+# `gap = 1`, forced-multi com `drat-trim VERIFIED`, NPN-distintas — e a do nível 10 entregou zero
+# (perna 1 e perna 2, `fatia_nivel10.csv` e `fatia_nivel10_fila2.csv`).
+#
+# POR QUE LER A FATIA E NÃO ESCREVER AS QUATRO NO `NONLIFTS` ACIMA. É a mesma razão do bloco do
+# censo, escrita três linhas antes: lista copiada à mão diverge do que foi certificado. Com a fatia
+# como insumo, uma classe nova de um nível futuro entra sozinha no CSV dono, e aí o `tools/nums_f5.py`
+# fica VERMELHO até que as 14 ocorrências na prosa digam o mesmo número — que é exatamente o
+# comportamento desenhado, não um efeito colateral: o CSV é o dono, a prosa segue.
+#
+# As quatro são `non-lift` por MEDIÇÃO e não por analogia (L53, 21-10): nenhuma é AND-lift nem OR-lift
+# das seis sementes de n=4 — sobreposição zero com os 11 canons de lift —, o que era de esperar,
+# porque vêm da lei `beside`, que soma 2 ao `opt`, e o lift do Teorema 5.1 soma 1. A dedup por canônica
+# abaixo cuida do resto; o gate de convenção é o mesmo do censo, e tem de ser, senão as contagens são
+# incomparáveis.
+_FATIAS = sorted(glob.glob(os.path.join(_AQUI, "fatia_nivel*.csv")))
+_nov_fatia = []
+for _f in _FATIAS:
+    with open(_f, newline="") as _fh:
+        for _r in csv.DictReader(_fh):
+            if _r.get("status") != "CLASSE NOVA DE F5":
+                continue
+            _c = int(_r["canon_hex"], 16)
+            if npn_canon(_c) != _c:
+                sys.exit(f"ERRO: a fatia dá 0x{_c:08x} como canônica, mas npn_canon devolve "
+                         f"0x{npn_canon(_c):08x} — convenções de grupo divergem")
+            if _c in _ja:
+                continue
+            _ja.add(_c)
+            _nov_fatia.append((_c, os.path.basename(_f)))
+            objs[f"0x{_c:08x}"] = _c
+            NONLIFTS[f"0x{_c:08x}"] = _c
+print(f"fatias de nível ({len(_FATIAS)} arquivo(s)): {len(_nov_fatia)} classe(s) nova(s) "
+      f"{[f'0x{c:08x} ({f})' for c, f in _nov_fatia]}\n")
 
 canon = {k: npn_canon(v) for k, v in objs.items()}
 groups = defaultdict(list)

@@ -84,7 +84,7 @@ class AIGEncoder:
     # está livre porque entradas são 1..n e portas são n+i.
     CONST_NODE = 0
 
-    def __init__(self, n, k, tt, formula=False, relax=()):
+    def __init__(self, n, k, tt, formula=False, relax=(), reconv_budget_opt=None):
         """`relax` desliga WLOGs para AUDITAR o argumento do §4.2, nunca para produzir claim.
 
         O §4.2 sustenta que os constraints estruturais do encoder são WLOG em k=opt e que nenhum muda
@@ -99,6 +99,16 @@ class AIGEncoder:
                   do AND. ATENÇÃO: `aeqb` sozinho NÃO relaxa a ordenação (revisão REV-0113) —
                   `combinations_with_replacement` devolve pares ordenados, só admitindo a==b
 
+        `reconv_budget_opt` é um FIO DE ARMADILHA, não uma opção. Quem for impor um TETO DE
+        RECONVERGÊNCIA por cima destas cláusulas (um at-most-k sobre os fan-out>=2) declara aqui o
+        `opt` da função, e o encoder recusa a combinação ilegal em vez de devolver UNSAT falso: o
+        dedup — proibir duas portas com o mesmo `(a,pa,b,pb)` — é WLOG só em `k <= opt`, porque
+        fundir duas portas idênticas dá `opt-1` e contradiz minimalidade. Acima de `opt` sob teto de
+        reconvergência deixa de ser WLOG: compartilhar GASTA uma reconvergência, logo DUPLICAR pode
+        ser estritamente ótimo, e proibir a duplicata apaga o circuito certo. Foi o que deu
+        `R_1(0x07e9) = 10` com `rc=20`, `status=ok` e sem timeout, quando o valor é 9 e há circuito
+        exibido (`exp_krinkin_cor6/verifica_0x07e9.py`). Ver `notes/divergencia_0x07e9_r1.md`.
+
         Os outros dois — toda porta alimenta uma posterior, e a saída é a porta k — NÃO são relaxáveis:
         porta morta significa circuito menor, logo eles não são simetria, são a DEFINIÇÃO de "ótimo com
         k portas". Relaxá-los tornaria a pergunta outra.
@@ -109,6 +119,15 @@ class AIGEncoder:
         modo formula do XAGEncoder; a restrição adicional é só a de fan-out."""
         self.n, self.k, self.tt, self.formula = n, k, tt, formula
         self.relax = set(relax)
+        # FIO DE ARMADILHA: veredito correcto sobre espaço errado (2026-08-31). Ver docstring.
+        if (reconv_budget_opt is not None and not formula
+                and "dup" not in self.relax and k > reconv_budget_opt):
+            raise ValueError(
+                "AIGEncoder: teto de reconvergência em k=%d > opt=%d com o dedup LIGADO. "
+                "O dedup é WLOG só em k <= opt; acima disso duplicar pode ser estritamente ótimo "
+                "(compartilhar gasta uma reconvergência) e este encoder devolveria UNSAT FALSO. "
+                "Passe relax=(\"dup\",) quando k > opt. Ver notes/divergencia_0x07e9_r1.md"
+                % (k, reconv_budget_opt))
         self.rows = 1 << n
         self.nvars = 0
         self.clauses = []

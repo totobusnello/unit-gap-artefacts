@@ -25,10 +25,17 @@ Remaining confidence gaps: encoder→CNF (G3) + drat-trim — the same as claims
 import sys
 import os
 import shutil
+import io
+import time
 import subprocess
 import hashlib
 import json
 from itertools import combinations
+
+# O drat-trim tem teto INTERNO de 40000 s (`#define TIMEOUT 40000`, flag `-t`) e imprime
+# `s TIMEOUT` ao estoura-lo (rc=0). Sem `-t`, todo «s TIMEOUT» foi esse teto, nao propriedade
+# do proof (PR #141). Teto explicito via env DRAT_TIMEOUT_S (default 7 dias).
+DRAT_T = int(os.environ.get("DRAT_TIMEOUT_S", str(7 * 24 * 3600)))
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "exp_gate_0001"))
@@ -102,18 +109,71 @@ def kissat(cnf, drat=None):
     return p.returncode, model
 
 
-def drat_verify(cnf, drat):
-    """True iff drat-trim actually verified the proof. See tools/check_drat.sh for the shell twin.
+def drat_verify_detalhado(cnf, drat):
+    """Verifica e devolve o desfecho DISCRIMINADO, nao um bool. See tools/check_drat.sh.
 
-    The `s ` prefix is load-bearing and must stay: `"VERIFIED" in stdout` — which decide_pending.py
-    used until review REV-0096 reproduced the failure — is also true of `s NOT VERIFIED`, so it
-    passes a FAILED proof. This function was never affected (`"s VERIFIED" in "s NOT VERIFIED"` is
-    False), which is why the seven opt legs it validated are sound. Exit code added for parity with
-    check_drat.sh: a checker that dies after printing the status line should not count as evidence.
+    The `s ` prefix is load-bearing and must stay: `"VERIFIED" in stdout` -- which decide_pending.py
+    used until review REV-0096 reproduced the failure -- is also true of `s NOT VERIFIED`, so it
+    passes a FAILED proof.
+
+    POR QUE O BOOL NAO BASTA (30/31-08-2026). Quatro desfechos incompativeis viravam um `False`, e o
+    caller gravava a palavra `NAO_VERIFICADO`, que afirma algo sobre a PROVA:
+
+      s VERIFIED    + rc == 0  -> a prova esta certa
+      s NOT VERIFIED           -> a prova esta ERRADA  (o unico caso que e NAO_VERIFICADO)
+      s VERIFIED    + rc != 0  -> verificou e morreu a seguir; nao conta como evidencia
+      sem linha `s ` / sinal   -> o checker foi MORTO no meio; nao verificou NEM refutou
+
+    Em 30-08 quatro classes de opt=9 (0x0168, 0x0661, 0x166a, 0x16ac) sairam `NAO_VERIFICADO` do
+    ultimo caso: o recert roda num ProcessPoolExecutor e o teto do cgroup do container era 59.6 GB
+    (`memory.limit_in_bytes`; o `free` mostrava os 124 GB do HOST), com ~6 GB de RSS por drat-trim.
+    `memory.max_usage_in_bytes` igualou o limite e o cgroup registrou `oom_kill 4`. Re-verificadas
+    uma a uma, sobre bytes de sha IDENTICO ao gravado no CSV, 0x16ac e 0x0168 deram `s VERIFIED`
+    rc=0. O defeito era da corrida, nunca da cadeia -- e o bool tinha descartado a distincao.
     """
     _exige("drat-trim")
-    v = subprocess.run(["drat-trim", cnf, drat], capture_output=True, text=True)
-    return "s VERIFIED" in v.stdout and v.returncode == 0
+    t0 = time.time()
+    v = subprocess.run(["drat-trim", cnf, drat, "-t", str(DRAT_T)], capture_output=True, text=True)
+    linhas = (v.stdout or "").replace("\r", "\n").split("\n")
+    status = next((l.strip() for l in reversed(linhas) if l.strip().startswith("s ")), "")
+    ok = status == "s VERIFIED" and v.returncode == 0
+    rc = v.returncode
+    if ok:
+        veredicto = "VERIFIED"
+    elif status == "s NOT VERIFIED":
+        veredicto = "NAO_VERIFICADO"
+    elif status == "s TIMEOUT" or "time limit exceeded" in (v.stdout or "").lower():
+        veredicto = "TIMEOUT"
+    elif rc < 0:                      # subprocess devolve -N quando morre por sinal N
+        veredicto = f"CHECKER_MORTO_sinal{-rc}"
+    elif rc >= 128:                   # shell convention
+        veredicto = f"CHECKER_MORTO_sinal{rc - 128}"
+    else:
+        veredicto = "CHECKER_MORTO"
+    t = time.time() - t0
+    try:
+        tam = os.path.getsize(drat) if os.path.exists(drat) else -1
+        with io.open(drat + ".verify.log", "w", encoding="utf-8", newline="") as fh:
+            fh.write(f"veredicto={veredicto}\n")
+            fh.write(f"status_drat_trim={status or '(sem linha `s `)'}\n")
+            fh.write(f"returncode={rc}\n")
+            fh.write(f"t_verify_s={t:.1f}\n")
+            fh.write(f"drat_bytes={tam}\n")
+            fh.write(f"stderr_tail={(v.stderr or '')[-400:]!r}\n")
+    except Exception as e:                                   # noqa: BLE001
+        # instrumentacao NAO pode derrubar uma verificacao que passou
+        print(f"  aviso: sidecar de drat_verify falhou ({e}); veredicto preservado", file=sys.stderr)
+    return {"ok": ok, "veredicto": veredicto, "status": status or "(sem linha `s `)",
+            "rc": rc, "t_s": round(t, 1)}
+
+
+def drat_verify(cnf, drat):
+    """True iff drat-trim actually verified the proof. Casca de drat_verify_detalhado.
+
+    Mantida porque 6 call sites dependem do bool. Quem GRAVA veredicto deve usar a versao
+    detalhada -- o bool nao distingue "a prova esta errada" de "a minha corrida morreu".
+    """
+    return drat_verify_detalhado(cnf, drat)["ok"]
 
 
 def build_amo_shared(tt, opt):

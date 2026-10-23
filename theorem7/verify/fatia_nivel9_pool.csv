@@ -1,0 +1,27 @@
+canon_hex,tt5_hex,z_hex,construction,membros_npn,k,estado,fonte,note
+0x00034464,0x03580050,0x0358,z and (x2 or x4),2,9,VIVA (sem perna nenhuma),,classe NPN nunca tocada: as 5 pernas correm aqui
+0x00034465,0x03590050,0x0359,z and (x2 or x4),2,9,VIVA (sem perna nenhuma),,classe NPN nunca tocada: as 5 pernas correm aqui
+0x00034588,0x03580208,0x0358,z and (x0 or x4),2,9,VIVA (gap=1 ja certificado),law_n5_beside_lower_sweep16.csv,"o gap e re-medido aqui de propria conta: ~300 s que removem a dependencia do artefato de sweep16, cujo rotulo esta errado"
+0x00034589,0x03590208,0x0359,z and (x0 or x4),2,9,VIVA (gap=1 ja certificado),law_n5_beside_lower_sweep16.csv,"o gap e re-medido aqui de propria conta: ~300 s que removem a dependencia do artefato de sweep16, cujo rotulo esta errado"
+0x00035588,0x03580308,0x0358,z and (~x2 or x4),2,9,VIVA (sem perna nenhuma),,classe NPN nunca tocada: as 5 pernas correm aqui
+0x0007b0bc,0x07bc00b0,0x07bc,z and (x2 or x4),2,9,VIVA (sem perna nenhuma),,classe NPN nunca tocada: as 5 pernas correm aqui
+0x0007bbcc,0x07bc070c,0x07bc,z and (~x2 or x4),2,9,VIVA (sem perna nenhuma),,classe NPN nunca tocada: as 5 pernas correm aqui
+0x000f77b3,0x0f5f0358,0x0358,z or (~x2 and x4),2,9,VIVA (sem perna nenhuma),,classe NPN nunca tocada: as 5 pernas correm aqui
+0x000f77b7,0x0f5f0359,0x0359,z or (~x2 and x4),2,9,VIVA (sem perna nenhuma),,classe NPN nunca tocada: as 5 pernas correm aqui
+0x0019ea19,0xf7fc07bc,0x07bc,z or (x2 and x4),2,9,VIVA (sem perna nenhuma),,classe NPN nunca tocada: as 5 pernas correm aqui
+0x0019eaea,0x0fbf07bc,0x07bc,z or (~x2 and x4),2,9,VIVA (sem perna nenhuma),,classe NPN nunca tocada: as 5 pernas correm aqui
+0x001b3c1b,0x07bc048c,0x07bc,z and (x1 or x4),1,9,VIVA (sem perna nenhuma),,classe NPN nunca tocada: as 5 pernas correm aqui
+0x001b3c3c,0x07bc0330,0x07bc,z and (~x1 or x4),1,9,VIVA (sem perna nenhuma),,classe NPN nunca tocada: as 5 pernas correm aqui
+0x001bc31b,0x37bf07bc,0x07bc,z or (~x1 and x4),1,9,VIVA (sem perna nenhuma),,classe NPN nunca tocada: as 5 pernas correm aqui
+0x001bc3c3,0xcffc07bc,0x07bc,z or (x1 and x4),1,9,VIVA (sem perna nenhuma),,classe NPN nunca tocada: as 5 pernas correm aqui
+0x001ebb1e,0xf3f90359,0x0359,z or (x2 and x4),2,9,VIVA (sem perna nenhuma),,classe NPN nunca tocada: as 5 pernas correm aqui
+0x003dee3d,0xf3f80358,0x0358,z or (x2 and x4),2,9,VIVA (sem perna nenhuma),,classe NPN nunca tocada: as 5 pernas correm aqui
+0x00035599,0x03590309,0x0359,z and (~x2 or x4),2,9,EM F5,f5_classes.csv,fora da fatia: ja decidida: nao se gasta perna nela
+0x00063344,0x03580150,0x0358,z and (~x0 or x4),2,9,MORTA: gap colapsou (gap=0),law_n5_beside_lower.csv,fora da fatia: ja decidida: nao se gasta perna nela
+0x00063355,0x03590151,0x0359,z and (~x0 or x4),2,9,MORTA: gap colapsou (gap=0),law_n5_beside_lower.csv,fora da fatia: ja decidida: nao se gasta perna nela
+0x001b574c,0x07bc02a8,0x07bc,z and (x0 or x4),2,9,EM F5,f5_classes.csv,fora da fatia: ja decidida: nao se gasta perna nela
+0x001bd71b,0xabfb0359,0x0359,z or (x0 and x4),2,9,MORTA: nao forcada (SAT auditado),law_forced_multi_k9_vps.csv,fora da fatia: ja decidida: nao se gasta perna nela
+0x001bd7d7,0x575d0359,0x0359,z or (~x0 and x4),2,9,MORTA: nao forcada (SAT auditado),law_forced_multi_k9_vps.csv,fora da fatia: ja decidida: nao se gasta perna nela
+0x001e9a1e,0xafbe07bc,0x07bc,z or (x0 and x4),2,9,EM F5,f5_classes.csv,fora da fatia: ja decidida: nao se gasta perna nela
+0x003c5f75,0x575d0358,0x0358,z or (~x0 and x4),2,9,MORTA: gap colapsou (gap=0),law_n5_beside_lower.csv,fora da fatia: ja decidida: nao se gasta perna nela
+0x003ded3d,0xabfa0358,0x0358,z or (x0 and x4),2,9,MORTA: nao forcada (SAT auditado),law_forced_multi_k9_vps.csv,fora da fatia: ja decidida: nao se gasta perna nela

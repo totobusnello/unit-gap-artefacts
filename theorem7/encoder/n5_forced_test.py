@@ -170,7 +170,7 @@ def main():
         rcw, mw = kissat(cnfw)
         # A perna de `tree` aceitava APENAS o codigo SAT (`rcw == 10`), sem decodificar o modelo,
         # sem re-simular a tabela e sem contar fan-out -- assimetrica em relacao a testemunha de
-        # `opt` logo acima, que faz as tres coisas. Achado no painel de revisão de 22-08 ([media]).
+        # `opt` logo acima, que faz as tres coisas. Achado pelo codex no painel de 22-08 ([media]).
         # `tree` e' numero PUBLICADO, e a re-simulacao existe justamente para apanhar bug de
         # encoder: confiar na codificacao formula e' confiar no que se quer verificar. Logica
         # portada do cert_chain.py:66-86, que ja fazia certo.
@@ -178,7 +178,12 @@ def main():
         if rcw == 10:
             gw, ow = enc_decode_tree(encw, mw)
             vcw = verify_circuit(N, tt, gw, ow)
-            # gate i (1-based) tem id N+i; entradas sao 1..N. fan-out por CONSUMIDOR distinto.
+            # gate i (1-based) tem id N+i; entradas sao 1..N.
+            # O laco abaixo incrementa nos DOIS operandos, logo conta ARESTAS, nao consumidores
+            # distintos — o comentario anterior dizia o contrario do que o codigo faz. E inocuo,
+            # mas nao pelo argumento de otimalidade do 2.1: o encoder enumera o par com
+            # combinations(nodes, 2), entao a < b por CONSTRUCAO e nenhum circuito codificavel le
+            # o mesmo fio nas duas pontas. As duas leituras dao o mesmo numero aqui, sempre.
             fanout = {}
             for (a, _pa, b, _pb) in gw:
                 for operand in (a, b):

@@ -93,6 +93,20 @@ def checkpoint_csv(path, fieldnames, rows):
         w.writerows(rows)
 
 
+def resume_source(path):
+    """Where a RESUMABLE producer reads its progress from (added 2026-10-08).
+
+    Progress lives only in `path + '.partial'` (see `checkpoint_csv`), so a run that died mid-way left
+    it THERE, not in the final file. Returns the `.partial` if it exists and is non-empty, else the
+    final `path` if it does, else None. A `.partial` rejected by the gate of `write_csv_atomic` is
+    also a valid source: it holds every row the run produced.
+    """
+    for p in (path + ".partial", path):
+        if os.path.exists(p) and os.path.getsize(p) > 0:
+            return p
+    return None
+
+
 def fail(exc):
     """Print an ArtefactIncomplete and exit 3 — the code the harvest tooling already treats as 'do not
     harvest'. Kept here so every producer script reports the same way."""

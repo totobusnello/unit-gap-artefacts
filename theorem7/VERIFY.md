@@ -15,12 +15,13 @@ and the pinned **CNF SHA** of each instance. A CNF's hash is deterministic from 
 - Krinkin's Theorem 7 (a unit gap comes from *exactly one* shared gate) is **false**; the opposite
   holds and is *forced*: some functions have **every** size-optimal AIG carrying ≥ 2 reconvergent
   (fan-out ≥ 2) gates. At n = 4 there are exactly six such NPN classes.
-- **Closure / Lift Theorem** (paper proof, `proofs/proof_lift_lemma.md`): if `z` is
+- **Closure / Lift Theorem** (machine-checked in Lean, claims 0061, 0075 and 0080, except one prose
+  premise, the bridge to the designated-output convention; proof in `proofs/proof_lift_lemma.md`): if `z` is
   forced-multi with gap = 1, so are `z ∧ x_new` and `z ∨ x_new` — hence the family exists for
   every n ≥ 4. Corroborated by DRAT at n = 4, 5, 6.
 - **Density**: at n = 5 the family exceeds its own lift closure — witness `f = 0x03de ∧ (¬x₀ ∨ x₄)`
   (`0x03de0154`): non-canalizing, opt = 8, tree = 9 (gap = 1), forced-multi. Counting NPN classes,
-  n = 5 has **at least 74** (`F₅ ≥ 74`) — **eleven** lift classes plus **63 non-lifts** — all checked
+  n = 5 has **at least 78** (`F₅ ≥ 78`) — **eleven** lift classes plus **67 non-lifts** — all checked
   pairwise distinct by exhaustive canonicalisation over the full NPN group, in pure Python with no
   solver. So the family is a genuine object, not one small case propagated by a construction.
   *Corrected 2026-08-11:* this said "at least ten" because the counting script generated only the
@@ -194,29 +195,38 @@ drat-trim verify/sample_certs/n5_0x03de0154_opt_k3.cnf \
           verify/sample_certs/n5_0x03de0154_opt_k3.drat   # expect: s VERIFIED
 ```
 
-## Count the classes (F₅ ≥ 74)
+## Count the classes (F₅ ≥ 78)
 
 ```sh
 python3 verify/npn_check_f5.py
 ```
 
 Pure Python, no solver, seconds to run: canonicalizes every witness over the full n = 5 NPN group (all
-7680 transforms) and reports **21** distinct classes — **11** in the lift closure (6 AND-lifts + 6
-OR-lifts, exactly one collision) plus the **ten** non-lifts. It also asserts *why* there is exactly one
+7680 transforms) and reports **78** distinct classes — **11** in the lift closure (6 AND-lifts + 6
+OR-lifts, exactly one collision) plus the **67** non-lifts. It also asserts *why* there is exactly one
 collision: `OR-lift(z) ≅ AND-lift(¬z)` under NPN spends the output negation, so the two lifts of `z`
 coincide iff `z` is NP-self-complementary, and exactly one of the six n = 4 classes is. The check fails
 loudly if that explanation ever stops holding.
+
+Besides the eleven it builds itself, the counter reads two artefacts that ship beside it: the
+exhaustive `opt = 8` census (`verify/k8_forced_multi_certificado.csv`) and the level slices
+(`verify/fatia_nivel9.csv`, `verify/fatia_nivel10.csv`, `verify/fatia_nivel10_fila2.csv`). From the
+slices it takes only the rows marked `CLASSE NOVA DE F5`, and it re-canonicalises each one before
+accepting it — a row whose stated canonical form disagrees with the group action aborts the run
+rather than inflating the count. The `verify/fatia_nivel9_pool.csv` and `verify/fatia_nivel10_pool.csv`
+files beside them list the candidates *before* any leg ran, so the slice can be checked for selection
+after the fact rather than taken on trust.
 
 **The count is a file, not a line of output.** The run writes `verify/f5_classes.csv` — one row per
 object with its canonical form — so you can recount it without trusting the summary, or us:
 
 ```sh
-tail -n +2 verify/f5_classes.csv | cut -d, -f5 | sort -u | wc -l                      # 21
+tail -n +2 verify/f5_classes.csv | cut -d, -f5 | sort -u | wc -l                      # 78
 tail -n +2 verify/f5_classes.csv | grep -v non-lift | cut -d, -f5 | sort -u | wc -l   # 11 in the closure
 awk -F, 'NR>1 && $6==2 {print $1}' verify/f5_classes.csv                              # the colliding pair
 ```
 
-That file appears only if the run passes its own gate: the row count must match the sixteen objects and
+That file appears only if the run passes its own gate: the row count must match the seventy-nine objects and
 the number of distinct canonical forms must equal the count printed, or the final filename is never
 written (`verify/artifact_io.py`). An interrupted or inconsistent run leaves a `.partial` you can inspect
 and nothing that looks like a result, so the number above is either right or absent — never silently
@@ -226,16 +236,19 @@ copies wearing a finished file's name.
 The counter this bundle ships supersedes an earlier one: it lifted only by AND and therefore reported 10.
 
 This script establishes **distinctness**, which is solver-free and therefore the cheapest part to
-trust. It does **not** establish that each of the seventy-four is forced-multi; that comes per witness
-from the certificates. As of 2026-08-29 **sixty-nine** of the seventy-four carry a forced-multi chain
+trust. It does **not** establish that each of the seventy-eight is forced-multi; that comes per witness
+from the certificates. As of 2026-08-29 **sixty-nine** of the seventy-eight carry a forced-multi chain
 of their own at `n = 5`, all on the no-SB path. The decomposition is worth writing out, because two
 different sets here have size 63. The `opt = 8` census is 63 classes, of which six are lift classes
-and 57 are non-lifts. The family has 63 non-lifts in total: those 57, plus six certified earlier —
-four at `opt = 7` and two at `opt = 9`. What carries an `n = 5` chain is the union: 63 non-lifts plus
-the six lift classes the census re-derived, hence **69**. The remaining five are lift classes that
+and 57 are non-lifts. The family has 67 non-lifts in total: those 57, plus six certified earlier —
+four at `opt = 7` and two at `opt = 9` — plus the four of the level-9 slice (§6.7.1 of the paper).
+What carries a full `n = 5` chain is the union: 63 non-lifts plus
+the six lift classes the census re-derived, hence **69**. Five more are lift classes that
 reach `n = 5` through the Lift theorem applied to a certified `n = 4` base — a proof, but a
-differently-shaped one. So a reader who accepts only plain DRAT gets `F₅ ≥ 69`, and the full
-`F₅ ≥ 74` needs the Lift theorem as well.
+differently-shaped one — and the last four carry a DRAT-checked forced-multi refutation whose `opt`
+and `tree` legs are solver output without proofs. So a reader who accepts only plain DRAT on every leg
+gets `F₅ ≥ 69`, the full `F₅ ≥ 78` needs the Lift theorem and the slice as well, and the paper keeps
+the three tiers apart rather than averaging them.
 Note what does *not* travel, and why. The census `.drat` files were **deleted** after `drat-trim`
 verified them and their SHA-256 was recorded: each regenerates from its CNF in roughly 200 s, so
 storing them bought nothing. `manifest.csv` pins the hashes, which is what makes a regenerated proof
@@ -321,6 +334,7 @@ So what is claimed here is **reachability without construction**, which the witn
   structure → density), with the honest scope.
 - `proofs/technote_thm7_refutation.md`, `technote_z_generalization.md`,
   `technote_npn4_gap_closure.md`, `technote_unitgap_basedep.md` — the supporting technotes.
+
 
 ## The encoder (what the CNFs mean)
 

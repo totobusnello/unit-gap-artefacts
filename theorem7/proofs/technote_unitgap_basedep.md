@@ -1,5 +1,6 @@
 # The "Unit Gap" Is Base-Dependent: A Mechanically Verified Refutation and a Three-Base Census at n ≤ 4
 
+
 > **Note (2026-10-13).** This is a working note from July 2026, kept as it was written. Three corrections
 > came later: (i) the three NPN classes with the maximum gap 6 at n = 4 are distinct classes, and parity
 > is one of them, not "parity-4 and relatives"; (ii) under Krinkin's verbatim definition in Corollary 6,
