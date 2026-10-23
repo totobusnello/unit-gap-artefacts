@@ -170,7 +170,7 @@ def main():
         rcw, mw = kissat(cnfw)
         # A perna de `tree` aceitava APENAS o codigo SAT (`rcw == 10`), sem decodificar o modelo,
         # sem re-simular a tabela e sem contar fan-out -- assimetrica em relacao a testemunha de
-        # `opt` logo acima, que faz as tres coisas. Achado pelo codex no painel de 22-08 ([media]).
+        # `opt` logo acima, que faz as tres coisas. Achado no painel de revisão de 22-08 ([media]).
         # `tree` e' numero PUBLICADO, e a re-simulacao existe justamente para apanhar bug de
         # encoder: confiar na codificacao formula e' confiar no que se quer verificar. Logica
         # portada do cert_chain.py:66-86, que ja fazia certo.
