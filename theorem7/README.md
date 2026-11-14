@@ -18,9 +18,9 @@ whose *every* size-optimal circuit is forced to reconverge (the **forced-reconve
 
 At n = 4 the family has exactly six NPN classes, exhaustively. The Lift Theorem (a paper proof,
 corroborated by certificates at n = 4, 5 and 6) makes it non-empty at every n ≥ 4, and it covers both
-`z ∧ x_new` and `z ∨ x_new`. At n = 5 there are **at least 79** distinct classes — **eleven** in
-the lift closure plus **sixty-eight** non-lifts — so the family is strictly richer than its own closure
-and is not one small case propagated by a construction. All 79 are checked pairwise distinct by exhaustive
+`z ∧ x_new` and `z ∨ x_new`. At n = 5 there are **at least 83** distinct classes — **eleven** in
+the lift closure plus **seventy-two** non-lifts — so the family is strictly richer than its own closure
+and is not one small case propagated by a construction. All 83 are checked pairwise distinct by exhaustive
 canonicalisation over the full 7680-element NPN group, in pure Python with no solver involved.
 
 The closure holds eleven rather than six because both lift directions are counted: 6 + 6 with exactly
@@ -30,7 +30,7 @@ to `z`. The counter asserts that explanation class by class. An earlier version 
 least ten": the count was low because the counting script generated only the AND-lifts, which Kirill
 Krinkin spotted on 2026-08-11 while checking these artefacts without running a solver.
 
-**All sixty-eight non-lifts carry a forced-multi certificate produced with no symmetry breaking at
+**All seventy-two non-lifts carry a forced-multi certificate produced with no symmetry breaking at
 all**. Sixty-three of them have their CNF hash pinned in the manifest; the four from the level-9
 slice below are recorded in `verify/fatia_nivel9.csv` instead, with the solver time and the ceiling
 each ran under, which is less than a pinned hash and is said so here rather than implied otherwise.
@@ -38,7 +38,7 @@ The fifth from level 9 is recorded in `verify/fatia_nivel9_beside178e_fila2.csv`
 forced-multi proof.
 Two of the sixty-three were, until 2026-08-12, certified
 only through a proved WLOG gate-ordering; re-running their at-most-one-shared query with the ordering
-switched off closed both — UNSAT in 214 s and 180 s, `drat-trim` `s VERIFIED`. So **`F₅ ≥ 79` needs no
+switched off closed both — UNSAT in 214 s and 180 s, `drat-trim` `s VERIFIED`. So **`F₅ ≥ 83` needs no
 symmetry-breaking argument**, and the earlier split between certified and lemma-assisted counts is
 retired. Nothing in this bundle rests on that ordering. What the bundle pins is the subset of chains it still
 has: the `opt = 8` census proofs were deleted once `drat-trim` verified them and their SHA-256 was
@@ -76,14 +76,14 @@ witness with an inert fifth variable and you get `0x03de03de`, forced-multi with
 certified on the same chain (`verify/sample_certs/n5_0x03de03de_opt_k1..4`). That function is the n = 4
 phenomenon in five-variable clothing, which is what the qualifier is there to exclude.
 
-Two things that scan does *not* establish, and the distinction matters. `F₅ ≥ 79` rests on the
+Two things that scan does *not* establish, and the distinction matters. `F₅ ≥ 83` rests on the
 certificates alone — the enumeration is how they were found, not why they hold. And the claim that level
 7 holds *exactly* six classes, like the claim that level 8 holds *exactly* sixty-three, is the part
 resting on the enumeration being complete; the bound and the minimality do not. None of the four
 `opt = 7` classes is balanced, so none can be NP-self-complementary — but the `opt = 8` census found
 three that are, so the count of such classes at `n = 5` is now `s₅ ≥ 3`, not zero. Their two lifts
-collide, which is Theorem A.5 read backwards, and it is why the closure of the seventy-nine seeds at
-`n = 6` is 155 classes and not 158.
+collide, which is Theorem A.5 read backwards, and it is why the closure of the eighty-three seeds at
+`n = 6` is 163 classes and not 166.
 
 The fifth and sixth arrived on 2026-08-14, from applying the construction behind three of the first four
 to **every** n = 4 seed instead of the one it was aimed at: eighteen constructions, each decided in two
@@ -97,8 +97,12 @@ large for that, so it was sampled by a rule fixed before any solver ran: the thr
 legs. Seven died because the gap collapsed to 0, six to a satisfying assignment that was decoded and
 re-simulated before the death was accepted, and **four are new**: `0x00034588`, `0x001b3c3c`,
 `0x001bc31b`, `0x001bc3c3`. None was left undecided. A second slice over the two seeds with
-`opt(z) = 8` added nothing: of the sixteen classes it reached, two fell outside the level, ten died,
-and four hit the proof-size ceiling still undecided. The two that fell outside it, both from the seed
+`opt(z) = 8` reached sixteen classes: two fell outside the level, ten died, and four hit the slice's
+budget still undecided. Those four (`0x00187e18`, `0x00192d19`, `0x00192d2d`, `0x001e9b1e`) were decided on
+2026-11-14 and **all four are new**: the forced-multi refutation of each was split into 2,400 cubes on two
+at-least-one clauses of the encoding, every cube unsatisfiable with a DRAT proof `drat-trim` reports
+`VERIFIED`, and the cover checked separately; the `opt` and gap legs carry DRAT proofs too. The consolidated
+rows are `verify/fatia_nivel10_cert.csv`. *Until 2026-11-14 this sentence said the slice "added nothing".* The two that fell outside it, both from the seed
 `0x178e`, were then run at level 9 (2026-11-08): `0x00178e17` fails the unit gap (`tree = 11`,
 `gap = 2`), and **`0x00187e7e` is new**. All three of its unsatisfiable legs (`opt` at `k = 8`,
 the gap formula at `k = 9`, the at-most-one-shared refutation at `k = 9`) carry a DRAT proof that
@@ -106,17 +110,17 @@ the gap formula at `k = 9`, the at-most-one-shared refutation at `k = 9`) carry 
 Their first pass is `verify/fatia_nivel9_beside178e.csv`; the `ANOMALIA` it prints for `0x00178e17` is
 how the producer flags an optimum one below the value its law predicts.
 
-The first four new classes took the count from 74 to 78, and they are weaker than the rest in one
-respect, stated here rather than left for a reader to find: their forced-multi refutation is
-DRAT-checked like every other, but their `opt` and `tree` legs are solver output with no proof
-attached. The fifth took it to 79 and carries a proof on every unsatisfiable leg. The slices ship as `verify/fatia_nivel9.csv`,
-`verify/fatia_nivel9_beside178e_fila2.csv`, `verify/fatia_nivel10.csv` and `verify/fatia_nivel10_fila2.csv`, with the candidate pools beside them, so which classes were
+The first four new classes took the count from 74 to 78; until 2026-11-08 their `opt` and `tree` legs
+were solver output with no proof attached, and that day they were redone with DRAT proofs. The fifth took
+it to 79 and the four of level 10 to 83, each with a proof on every unsatisfiable leg. The slices ship as `verify/fatia_nivel9.csv`,
+`verify/fatia_nivel9_beside178e_fila2.csv`, `verify/fatia_nivel10.csv`, `verify/fatia_nivel10_fila2.csv` and `verify/fatia_nivel10_cert.csv`, with the candidate pools beside them, so which classes were
 considered — not only which survived — can be checked rather than taken on trust.
 
-So the count comes in three tiers, and this bundle keeps them apart instead of averaging them:
-**70** classes carry a full `n = 5` DRAT chain on every leg; **75** once the Lift Theorem is accepted
-for five further closure classes, which is a proof of a differently shaped kind; **79** with the
-sampled slice above.
+So the count comes in two tiers, and this bundle keeps them apart instead of averaging them:
+**78** classes carry a full `n = 5` DRAT chain on every leg (for four of them the forced-multi leg is
+2,400 checked cubes rather than one proof); **83** once the Lift Theorem is accepted for five further
+closure classes, which is a proof of a differently shaped kind. *This read 70 / 75 / 79 in three tiers
+until 2026-11-14.*
 
 **What travels and what does not.** This bundle pins four of the six certificates, with CNF and DRAT
 hashes and a regenerator you can run. The two from 2026-08-14 are pinned by CNF hash only

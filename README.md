@@ -18,24 +18,24 @@ The directory [`theorem7/`](theorem7/) holds a second, self-contained result on 
 a refutation of **Theorem 7** and the positive structure that replaces it. Where Theorem 7 claims a
 unit gap comes from *exactly one* shared gate, the opposite holds and is *forced*: some functions
 have **every** size-optimal AIG carrying ≥ 2 reconvergent (fan-out ≥ 2) gates. A closure (Lift)
-theorem makes the family infinite (for every `n ≥ 4`), and at `n = 5` there are **at least 79**
-classes — eleven in the lift closure plus **68 outside it**, so the family is strictly richer than its
-own closure, by a factor of seven.
-Counting that closure one arity further gives `F₆ ≥ 155` and `F_n ≥ 155 · 2^{n−6}` for `n ≥ 6`,
+theorem makes the family infinite (for every `n ≥ 4`), and at `n = 5` there are **at least 83**
+classes — eleven in the lift closure plus **72 outside it**, so the family is strictly richer than its
+own closure, by a factor of more than seven.
+Counting that closure one arity further gives `F₆ ≥ 163` and `F_n ≥ 163 · 2^{n−6}` for `n ≥ 6`,
 without deciding a single optimum at `n = 6`. All reproducible from scratch with `kissat` + `drat-trim`. Start at
 [`theorem7/VERIFY.md`](theorem7/VERIFY.md), which states the count **by trust path** rather than as a
-single number — and as of 2026-08-12 that split collapsed in the useful direction: **`F₅ ≥ 79`**
+single number — and as of 2026-08-12 that split collapsed in the useful direction: **`F₅ ≥ 83`**
 needs no symmetry-breaking argument at all, so there is no longer a smaller certified count
-sitting behind a lemma. **64 classes rest on `n = 5` DRAT alone** — any one of them is enough to refute the
+sitting behind a lemma. **78 classes rest on `n = 5` DRAT alone** — any one of them is enough to refute the
 conjecture that the family is only its closure. Of the eleven lift classes, six also carry a chain of
 their own at `n = 5`, re-derived independently by the census; only five rest on the Lift theorem
-applied to a certified `n = 4` base, and that theorem is machine-checked. All sixty-eight non-lifts carry a forced-multi DRAT certificate that `drat-trim`
-reports as `VERIFIED`. Four of them arrived on 2026-10-22 from a sampled slice of level
-`opt = 9` and are weaker in one declared respect — their forced-multi leg is DRAT-checked like every
-other, their `opt` and `tree` legs are solver output without proofs. A fifth from the same level,
-added on 2026-11-08, is not: every unsatisfiable leg it has carries a verified DRAT proof. So the count
-reads in three tiers that `theorem7/README.md` keeps apart: 70 on a full DRAT chain, 75 with the Lift
-theorem, 79 with the slice. The census proofs are not in the bundle because they no longer exist anywhere:
+applied to a certified `n = 4` base, and that theorem is machine-checked. All seventy-two non-lifts carry a verified
+DRAT proof on every unsatisfiable leg. Five come from level `opt = 9` (a sampled slice and its second leg) and four
+from level `opt = 10`, added on 2026-11-14. For those four the forced-multi refutation was split into 2,400 cubes per
+class, each cube a DRAT proof that `drat-trim` reports as `VERIFIED`, with the cover of the cubes checked separately. So the
+count reads in two tiers that `theorem7/README.md` keeps apart: 78 on a full DRAT chain, 83 with the Lift
+theorem. *This paragraph read 70 / 75 / 79 in three tiers until 2026-11-14; the third tier had been emptied on
+2026-11-08, when the `opt` and `tree` legs of the level-9 slice were redone with DRAT proofs.* The census proofs are not in the bundle because they no longer exist anywhere:
 each was deleted once `drat-trim` had verified it and its SHA-256 was recorded, since regenerating one
 from its CNF costs about 200 s. `theorem7/VERIFY.md` carries the commands and `manifest.csv` the
 hashes, so a regenerated proof is comparable rather than merely re-run. This sentence said "two classes" until 2026-08-29: it was true when written and stayed
