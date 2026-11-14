@@ -1,0 +1,2 @@
+perna,canon_hex,tt5_hex,k,tipo,cnf_sha16,cnf_sha16_ref,kissat_rc,t_kissat,drat_bytes,drat_mb_s,drat_sha256,check_rc,check_linha,t_check,cap_s,host,status,note
+0x001e9b1e:opt9,0x001e9b1e,0xcefd06b5,9,circuito,146024fef55e60a9,146024fef55e60a9,20,6645.7,4817202225,0.725,50218a4d8f90fd6add65e0ab129eee1d7ae2daed805e2a740b865d56779504e4,0,VERIFIED  n5_0xcefd06b5_certf_opt9.drat  (drat-trim rc=0),8481.6,86400,ns5001902,VERIFIED,opt >= 10 com prova DRAT verificada (s VERIFIED); a prova so se apaga na colheita

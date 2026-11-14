@@ -1,0 +1,2 @@
+perna,canon_hex,tt5_hex,k,tipo,cnf_sha16,cnf_sha16_ref,kissat_rc,t_kissat,drat_bytes,drat_sha256,check_rc,check_linha,t_check,cap_s,host,status,note
+fm9,0x00187e7e,0x178e070e,9,forced_multi,ec39f0c1209bf2e0,ec39f0c1209bf2e0,20,2120.9,5213753226,619aa94dd929715a0214ae1711e1e5b304892f5f12af1befde97281d5fc0fe03,0,VERIFIED  n5_0x178e070e_cert_fm9.drat  (drat-trim rc=0),2092.8,604800,ns5001902,VERIFIED,todo AIG otimo tem >= 2 portas compartilhadas (forced-multi) com prova DRAT verificada (s VERIFIED); a prova so se apaga na colheita

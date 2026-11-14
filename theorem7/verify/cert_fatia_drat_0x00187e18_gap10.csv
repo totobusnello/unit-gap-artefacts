@@ -1,0 +1,2 @@
+perna,canon_hex,tt5_hex,k,tipo,cnf_sha16,cnf_sha16_ref,kissat_rc,t_kissat,drat_bytes,drat_mb_s,drat_sha256,check_rc,check_linha,t_check,cap_s,host,status,note
+0x00187e18:gap10,0x00187e18,0x178e1080,10,formula,fdecdd19559889aa,fdecdd19559889aa,20,10550.6,9271432593,0.879,d721e2623960a5c3722256492c64a7e966f0a579e814e6ee74bd6f9eafc81b0f,0,VERIFIED  n5_0x178e1080_certf_gap10.drat  (drat-trim rc=0),15893.6,86400,ns5001902,VERIFIED,"tree >= 11, logo gap = 1 com prova DRAT verificada (s VERIFIED); a prova so se apaga na colheita"

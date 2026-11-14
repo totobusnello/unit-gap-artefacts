@@ -102,7 +102,9 @@ budget still undecided. Those four (`0x00187e18`, `0x00192d19`, `0x00192d2d`, `0
 2026-11-14 and **all four are new**: the forced-multi refutation of each was split into 2,400 cubes on two
 at-least-one clauses of the encoding, every cube unsatisfiable with a DRAT proof `drat-trim` reports
 `VERIFIED`, and the cover checked separately; the `opt` and gap legs carry DRAT proofs too. The consolidated
-rows are `verify/fatia_nivel10_cert.csv`. *Until 2026-11-14 this sentence said the slice "added nothing".* The two that fell outside it, both from the seed
+rows are `verify/fatia_nivel10_cert.csv`; the per-leg records (`verify/cert_fatia_drat_*.csv`) and
+the per-cube records (`verify/cubos_fm_*_fm10_cert.csv`, one row per cube) ship beside it, and `VERIFY.md`
+shows how to recount the cubes. *Until 2026-11-14 this sentence said the slice "added nothing".* The two that fell outside it, both from the seed
 `0x178e`, were then run at level 9 (2026-11-08): `0x00178e17` fails the unit gap (`tree = 11`,
 `gap = 2`), and **`0x00187e7e` is new**. All three of its unsatisfiable legs (`opt` at `k = 8`,
 the gap formula at `k = 9`, the at-most-one-shared refutation at `k = 9`) carry a DRAT proof that
