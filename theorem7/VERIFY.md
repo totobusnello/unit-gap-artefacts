@@ -218,6 +218,27 @@ rather than inflating the count. The `verify/fatia_nivel9_pool.csv` and `verify/
 files beside them list the candidates *before* any leg ran, so the slice can be checked for selection
 after the fact rather than taken on trust.
 
+**Per-leg and per-cube records (added 2026-11-14).** The consolidated rows above carry only a 16-digit
+prefix of each proof's SHA-256. The records they were built from ship beside them:
+`verify/cert_fatia_drat_<class>_{opt,gap}<k>.csv` for the `opt` and gap legs of the eight slice classes
+(full proof SHA-256, CNF hash, `drat-trim` line and times), `verify/cert187e7e_drat_{opt8,gap9,fm9}.csv`
+for `0x00187e7e`, and `verify/cubos_fm_<class>_fm10_cert.csv` for the four classes of level 10, one row per
+cube of the split forced-multi refutation, plus the 41 split nodes and, in two of the files, rows
+marked `REUSO` that the recount below ignores. To recount the cubes without trusting
+the consolidated row:
+
+```sh
+for f in verify/cubos_fm_0x*_fm10_cert.csv; do
+  awk -F, '$5=="UNSAT" && $8=="s VERIFIED" && !($3 in s) {s[$3]; split($3,c,"_"); n++; a[c[1]]; b[c[2]]}
+           END {na=0; nb=0; for (x in a) na++; for (y in b) nb++; print FILENAME, n, na "x" nb}' "$f"
+done                                                   # expect: 2400 40x60 for each of the four
+```
+
+Every cube is a pair of literals, one from each of two at-least-one clauses of the encoding (variables
+321–360 and 361–420); 2,400 distinct verified pairs out of a 40 × 60 product is the whole product. That
+the two clauses occur in the base CNF, whose 16-digit hash is the `base_sha16` column, is checked when the
+base CNF is regenerated; the proofs themselves (1.1 to 1.6 TB per class) were deleted after checking.
+
 **The count is a file, not a line of output.** The run writes `verify/f5_classes.csv` — one row per
 object with its canonical form — so you can recount it without trusting the summary, or us:
 
