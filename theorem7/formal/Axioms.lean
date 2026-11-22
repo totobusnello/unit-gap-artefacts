@@ -1,4 +1,4 @@
-import LiftTower
+import TwoMechanism
 
 #print axioms ThresholdTree.threshold
 #print axioms ThresholdTree.tree_thm
@@ -12,3 +12,6 @@ import LiftTower
 #print axioms Witness4Forced.n5_witnesses
 #print axioms LiftTower.lift_tower
 #print axioms LiftTower.forced_family_nonempty_at_every_arity
+#print axioms TwoMechanism.not_twoMechanism_of_forcedMulti
+#print axioms TwoMechanism.theorem7_false_n4
+#print axioms TwoMechanism.theorem7_false
