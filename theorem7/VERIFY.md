@@ -360,6 +360,9 @@ So what is claimed here is **reachability without construction**, which the witn
   structure → density), with the honest scope.
 - `proofs/technote_thm7_refutation.md`, `technote_z_generalization.md`,
   `technote_npn4_gap_closure.md`, `technote_unitgap_basedep.md` — the supporting technotes.
+- `formal/README.md` — the four Lean 4 files behind the machine-checked statements (the
+  `0x03de` witness, Krinkin's Theorem 3, Theorem 5.2), how to build them, and what each one trusts
+  beyond the kernel.
 
 
 ## The encoder (what the CNFs mean)
