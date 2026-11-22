@@ -219,6 +219,29 @@ rather than inflating the count. The `verify/fatia_nivel9_pool.csv`, `verify/fat
 files beside them list the candidates *before* any leg ran, so the slice can be checked for selection
 after the fact rather than taken on trust.
 
+**Two slices that added no class (added 2026-11-21).** They ship for the same reason as the pools: a
+search that found nothing is part of the evidence about where the family is. Neither changes `F₅ ≥ 85`:
+no row in them is marked `CLASSE NOVA DE F5`, so the counter above takes nothing from them.
+
+- `verify/fatia_nivel9_foraF4.csv` (pool `verify/fatia_nivel9_foraF4_pool.csv`): level `opt = 9` built
+  from the 58 seeds of `opt = 7` at `n = 4` that lie outside the six classes of `F₄`, 525 classes, none
+  new (223 outside the level, 126 whose gap collapsed, 99 not forced-multi with an audited circuit).
+  The status `ANOMALIA` on the other 77 rows is a label written before the driver was corrected: for a
+  seed with gap ≥ 2 no formula of size `opt + 1` exists by construction, so a formula leg that times out
+  or comes back UNSAT there refutes nothing. The argument under "Seeds outside F4" in Section 6.7.1 of
+  the paper settles 55 of them; the other 22 were rerun with a cap of 86,400 s
+  (`verify/fatia_nivel9_foraF4_gap.csv`), and all 22 have gap ≥ 2 (formula at `k = 10` UNSAT, solver
+  verdict without DRAT, since it removes classes and adds none). The result holds for these seeds and
+  this sampled level only.
+- `verify/fatia_nivel10_queda9.csv` (pool `verify/fatia_nivel10_queda9_pool.csv`): level `opt = 10`
+  from the seeds it had not yet run: six of `opt = 9` at `n = 4` (one step up) and the two forced-multi
+  seeds of `opt = 8` outside `F₄` with gap 2 (`0x036d`, `0x16bc`, two steps up); 81 classes, none new
+  so far. 35 are dead (34 not forced-multi, 1 with its
+  gap collapsed) and 7 outside the level; **39 are still open**: 18 undecided at a cap of 36,000 s and
+  21 whose formula leg timed out at 10,800 s. A second leg for the 18 is running, so this slice does
+  not yet close the level for these seeds. `verify/fatia_nivel10_queda9ctl_controle.csv` and its pool
+  are the end-to-end control run before the batch: two classes of known verdict, decided again.
+
 **Per-leg and per-cube records (added 2026-11-14).** The consolidated rows above carry only a 16-digit
 prefix of each proof's SHA-256. The records they were built from ship beside them:
 `verify/cert_fatia_drat_<class>_{opt,gap}<k>.csv` for the `opt` and gap legs of the ten slice classes
