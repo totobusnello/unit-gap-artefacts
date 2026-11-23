@@ -3,7 +3,8 @@
 The first four files are the machine-checked part of *Forced Multiple Reconvergence at Unit Gap*
 (Zenodo, [doi:10.5281/zenodo.24408786](https://doi.org/10.5281/zenodo.24408786)). The paper cites
 them by file name under the layout of the development tree; the file names here are the same. The fifth,
-`TwoMechanism.lean` (added 2026-11-22), derives from them that Theorem 7 of arXiv:2603.08033v2 is false.
+`TwoMechanism.lean` (added 2026-11-22), derives from them that the cardinality clause of Theorem 7 of
+arXiv:2603.08033v2, read globally, is false for every `n ≥ 4`.
 
 | file | imports | what it proves |
 |---|---|---|
